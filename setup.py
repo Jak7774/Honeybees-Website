@@ -1,14 +1,18 @@
-import serial
-import MySQLdb
+import os
+#import MySQLdb
+import psycopg2
 
 # global parameters
 usb_port = '/dev/ttyACM0' # Arduino Port
 
 #---------- SQL DataBase Details -------
-dbConn = MySQLdb.connect(host='localhost',
-                         user='phpmyadmin',
-                         passwd='H0n3yb33s',
-                         db='phpmyadmin') or die ('Could not connect to Database')
+# dbConn = MySQLdb.connect(host='localhost',
+#                          user='phpmyadmin',
+#                          passwd='H0n3yb33s',
+#                          db='phpmyadmin') or die ('Could not connect to Database')
+
+dbURL = os.environ['postgres://olnhvbxpblxhvh:0aa4b83b313b77dc510803b926619ff2c6e003481c948b795f737ac9202dd4ce@ec2-184-73-198-174.compute-1.amazonaws.com:5432/db6rhe4umj2i5q']
+dbConn = psycopg2.connect(dbURL, sslmode='require')
 
 cursor = dbConn.cursor()
 

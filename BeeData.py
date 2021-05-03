@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import serial
+from serial import Serial
 import MySQLdb
 import time
 import datetime
@@ -36,5 +36,5 @@ def inputSQL(temp, humid):
 
 arduino = serial.Serial(usb_port, 9600, timeout=1)
 arduino.flush()
-# read_serial()
-# inputSQL(temp, humid)
+read_serial()
+inputSQL(temp, humid)
