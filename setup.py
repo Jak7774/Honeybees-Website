@@ -1,19 +1,14 @@
 import os
-#import MySQLdb
 import psycopg2
 
 # global parameters
 usb_port = '/dev/ttyACM0' # Arduino Port
 
 #---------- SQL DataBase Details -------
-# dbConn = MySQLdb.connect(host='localhost',
-#                          user='phpmyadmin',
-#                          passwd='H0n3yb33s',
-#                          db='phpmyadmin') or die ('Could not connect to Database')
+DATABASE_URL = os.environ['DATABASE_URL']
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
-dbURL = os.environ['DATABASE_URL']
-dbConn = psycopg2.connect(dbURL, sslmode='require')
-
+# dbURL = os.environ['DATABASE_URL']
 cursor = dbConn.cursor()
 
 # ------Query
