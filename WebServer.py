@@ -48,14 +48,13 @@ def update_line_chart(timegrp):
      Output('line-chart2', 'figure'),
      [Input('checklist2', 'value')])
 
-def update_line_chart(timegrp):
+def update_line_chart(humid_timegrp):
     mask = humid_plt.daygrp.isin(humid_timegrp)
     fig = px.line(humid_plt[mask],
                  x = 'datetime', y='reading', color='humidsensor')
     return fig
 
 #app.run_server(debug=False, host='0.0.0.0', port=8050)
-#app.run_server(debug=True)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
