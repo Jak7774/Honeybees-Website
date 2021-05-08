@@ -2,7 +2,8 @@
 
 from setup import *
 from datetime import datetime
-import MySQLdb
+#import MySQLdb
+import psycopg2
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -15,8 +16,8 @@ x = datetime.now() # Current DateTime for Reference
 
 rdgs = pd.read_sql(tempquery, con=dbConn)
 
-rdgs_plt = pd.melt(rdgs, id_vars=['DateTime'], var_name='TempSensor', value_name='Reading')
-rdgs_plt['daydiff'] = (x - rdgs_plt['DateTime']) / np.timedelta64(1, 'D')
+rdgs_plt = pd.melt(rdgs, id_vars=['datetime'], var_name='tempsensor', value_name='reading')
+rdgs_plt['daydiff'] = (x - rdgs_plt['datetime']) / np.timedelta64(1, 'D')
 rdgs_plt.loc[rdgs_plt['daydiff'] <= 1, 'daygrp'] = 1
 rdgs_plt.loc[(rdgs_plt['daydiff'] > 1) & (rdgs_plt['daydiff'] <= 7) , 'daygrp'] = 2
 rdgs_plt.loc[(rdgs_plt['daydiff'] > 7) & (rdgs_plt['daydiff'] <= 30) , 'daygrp'] = 3
@@ -42,9 +43,9 @@ timegrp_lab = rdgs_plt.daygrp_lab.unique()
 
 humid = pd.read_sql(humidquery, con=dbConn)
 
-humid_plt = pd.melt(humid, id_vars=['DateTime'], var_name='HumidSensor', value_name='Reading')
+humid_plt = pd.melt(humid, id_vars=['datetime'], var_name='humidsensor', value_name='reading')
 
-humid_plt['daydiff'] = (x - humid_plt['DateTime']) / np.timedelta64(1, 'D')
+humid_plt['daydiff'] = (x - humid_plt['datetime']) / np.timedelta64(1, 'D')
 humid_plt.loc[humid_plt['daydiff'] <= 1, 'daygrp'] = 1
 humid_plt.loc[(rdgs_plt['daydiff'] > 1) & (humid_plt['daydiff'] <= 7) , 'daygrp'] = 2
 humid_plt.loc[(humid_plt['daydiff'] > 7) & (humid_plt['daydiff'] <= 30) , 'daygrp'] = 3
@@ -63,4 +64,3 @@ humid_plt.loc[humid_plt['daygrp'] == 7, 'daygrp_lab'] = "Older still"
 
 humid_timegrp = humid_plt.daygrp.unique()
 humid_timegrp_lab = humid_plt.daygrp_lab.unique()
-
