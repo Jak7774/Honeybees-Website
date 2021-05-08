@@ -36,9 +36,4 @@ def inputSQL(temp, humid):
 
 arduino = serial.Serial(usb_port, 9600, timeout=1)
 arduino.flush()
-
-def updateBees():
-    if arduino.in_waiting > 0:
-            hive_temp, hive_humid = read_serial()
-            print(hive_temp, hive_humid)
-            inputSQL(hive_temp, hive_humid)
+            
