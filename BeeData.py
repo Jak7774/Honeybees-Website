@@ -24,8 +24,8 @@ def inputSQL(temp, humid):
     date = datetime.date.today()
     time = datetime.datetime.now().strftime("%X")
     
-    sql_temp = "insert into temps (DateTime, DateStamp, TimeStamp, temp1, temp2, temp3, temp4) values (%s, %s, %s, %s, %s, %s, %s)"
-    sql_humid = "insert into humidity (DateTime, DateStamp, TimeStamp, humid1, humid2) values (%s, %s, %s, %s, %s)"
+    sql_temp = "insert into temps (datetime, datestamp, timestamp, temp1, temp2, temp3, temp4) values (%s, %s, %s, %s, %s, %s, %s)"
+    sql_humid = "insert into humidity (datetime, datestamp, timestamp, humid1, humid2) values (%s, %s, %s, %s, %s)"
     
     values_temp = (now, date, time, temp[0], temp[1], temp[2], temp[3])
     values_humid = (now, date, time, humid[0], humid[1])
