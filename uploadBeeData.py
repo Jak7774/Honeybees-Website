@@ -4,7 +4,6 @@ import time
 from upload_setup import *
 from BeeData import *
 
-updateBees()
+if __name__=="__main__":
+    updateBees()
 
-#if __name__=="__main__":
-#    main()
