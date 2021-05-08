@@ -41,7 +41,7 @@ app.layout = html.Div([
 def update_line_chart(timegrp):
     mask = rdgs_plt.daygrp.isin(timegrp)
     fig = px.line(rdgs_plt[mask],
-                 x = 'DateTime', y='Reading', color='TempSensor')
+                 x = 'datetime', y='reading', color='tempsensor')
     return fig
 
 @app.callback(
@@ -51,7 +51,7 @@ def update_line_chart(timegrp):
 def update_line_chart(timegrp):
     mask = humid_plt.daygrp.isin(humid_timegrp)
     fig = px.line(humid_plt[mask],
-                 x = 'DateTime', y='Reading', color='HumidSensor')
+                 x = 'datetime', y='reading', color='humidsensor')
     return fig
 
 #app.run_server(debug=False, host='0.0.0.0', port=8050)
