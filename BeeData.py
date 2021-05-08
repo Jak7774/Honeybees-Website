@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from serial import Serial
-import MySQLdb
+import serial
+#import MySQLdb
 import time
 import datetime
-from setup import *
+from upload_setup import *
 
 temp = []
 humid = []
@@ -36,5 +36,9 @@ def inputSQL(temp, humid):
 
 arduino = serial.Serial(usb_port, 9600, timeout=1)
 arduino.flush()
-read_serial()
-inputSQL(temp, humid)
+
+def updateBees():
+    if arduino.in_waiting > 0:
+            hive_temp, hive_humid = read_serial()
+            print(hive_temp, hive_humid)
+            inputSQL(hive_temp, hive_humid)
