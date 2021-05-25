@@ -13,3 +13,4 @@ cursor = dbConn.cursor()
 #query = " SELECT a.DateTime, temp1, temp2, temp3, temp4, humid1, humid2 FROM temps as a INNER JOIN humidity as b ON a.DateTime = b.DateTime ORDER BY DateTime "
 tempquery  = " SELECT DateTime, temp1, temp2, temp3, temp4 FROM temps ORDER BY DateTime "
 humidquery = " SELECT DateTime, humid1, humid2 FROM humidity ORDER BY DateTime "
+weightquery = "SELECT DateTime, weight FROM humidity ORDER BY DateTime"
