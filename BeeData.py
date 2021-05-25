@@ -19,10 +19,10 @@ def read_serial():
     for i in [2, 4]:
         humid.append(data.split(",")[i])
     for i in [6]:
-        weight.append(data.split(",")([i])
+        weight.append(data.split(",")[i])
     return temp, humid, weight
     
-def inputSQL(temp, humid):
+def inputSQL(temp, humid, weight):
     
     now = datetime.datetime.now()
     date = datetime.date.today()
@@ -30,7 +30,7 @@ def inputSQL(temp, humid):
     
     sql_temp = "insert into temps (datetime, datestamp, timestamp, temp1, temp2, temp3, temp4) values (%s, %s, %s, %s, %s, %s, %s)"
     sql_humid = "insert into humidity (datetime, datestamp, timestamp, humid1, humid2) values (%s, %s, %s, %s, %s)"
-    sql_weight = "insert into weight (datetime, datestamp, timestamp, weight) values (%s, %s, %s, %s, )"
+    sql_weight = "insert into weight (datetime, datestamp, timestamp, weight) values (%s, %s, %s, %s )"
     
     values_temp = (now, date, time, temp[0], temp[1], temp[2], temp[3])
     values_humid = (now, date, time, humid[0], humid[1])
@@ -38,7 +38,7 @@ def inputSQL(temp, humid):
     
     cursor.execute(sql_temp, values_temp)
     cursor.execute(sql_humid, values_humid)
-    cursor.excute(sql_weight, values_weight)
+    cursor.execute(sql_weight, values_weight)
     dbConn.commit()
 
 arduino = serial.Serial(usb_port, 9600, timeout=1)
