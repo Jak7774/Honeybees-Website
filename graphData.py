@@ -64,3 +64,31 @@ humid_plt.loc[humid_plt['daygrp'] == 7, 'daygrp_lab'] = "Older still"
 
 humid_timegrp = humid_plt.daygrp.unique()
 humid_timegrp_lab = humid_plt.daygrp_lab.unique()
+
+#---------------------------------------
+# Weight Setup
+#---------------------------------------
+
+weight = pd.read_sql(weightquery, con=dbConn)
+
+weight_plt = pd.melt(weight, id_vars=['datetime'], var_name='weightsensor', value_name='reading')
+
+weight_plt['daydiff'] = (x - weight_plt['datetime']) / np.timedelta64(1, 'D')
+weight_plt.loc[weight_plt['daydiff'] <= 1, 'daygrp'] = 1
+weight_plt.loc[(rdgs_plt['daydiff'] > 1) & (weight_plt['daydiff'] <= 7) , 'daygrp'] = 2
+weight_plt.loc[(weight_plt['daydiff'] > 7) & (weight_plt['daydiff'] <= 30) , 'daygrp'] = 3
+weight_plt.loc[(weight_plt['daydiff'] > 30) & (weight_plt['daydiff'] <= 90) , 'daygrp'] = 4
+weight_plt.loc[(weight_plt['daydiff'] > 90) & (weight_plt['daydiff'] <= 180) , 'daygrp'] = 5
+weight_plt.loc[(weight_plt['daydiff'] > 180) & (weight_plt['daydiff'] <= 365) , 'daygrp'] = 6
+weight_plt.loc[weight_plt['daydiff'] > 365 , 'daygrp'] = 7
+
+weight_plt.loc[weight_plt['daygrp'] == 1, 'daygrp_lab'] = "1 Day"
+weight_plt.loc[weight_plt['daygrp'] == 2, 'daygrp_lab'] = "1 Week"
+weight_plt.loc[weight_plt['daygrp'] == 3, 'daygrp_lab'] = "1 Month"
+weight_plt.loc[weight_plt['daygrp'] == 4, 'daygrp_lab'] = "3 Months"
+weight_plt.loc[weight_plt['daygrp'] == 5, 'daygrp_lab'] = "6 Months"
+weight_plt.loc[weight_plt['daygrp'] == 6, 'daygrp_lab'] = "12 Months"
+weight_plt.loc[weight_plt['daygrp'] == 7, 'daygrp_lab'] = "Older still"
+
+weight_timegrp = weight_plt.daygrp.unique()
+weight_timegrp_lab = weight_plt.daygrp_lab.unique()

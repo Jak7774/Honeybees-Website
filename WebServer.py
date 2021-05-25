@@ -32,6 +32,16 @@ app.layout = html.Div([
         labelStyle={'display': 'inline-block'}
     ),
     dcc.Graph(id='line-chart2'),
+
+    #Weight Sensors
+    dcc.Checklist(
+        id = 'checklist3', # How to choose group category
+        options=[{'label': x, 'value': y}
+                 for x,y in zip(weight_timegrp_lab, weight_timegrp)], # Loop through to choose Label/Value for Checkbox
+        value = weight_timegrp, # Specify Starting Value
+        labelStyle={'display': 'inline-block'}
+    ),
+    dcc.Graph(id='line-chart3'),
 ])
 
 @app.callback(
@@ -52,6 +62,16 @@ def update_line_chart(humid_timegrp):
     mask = humid_plt.daygrp.isin(humid_timegrp)
     fig = px.line(humid_plt[mask],
                  x = 'datetime', y='reading', color='humidsensor')
+    return fig
+
+@app.callback(
+     Output('line-chart3', 'figure'),
+     [Input('checklist3', 'value')])
+
+def update_line_chart(weight_timegrp):
+    mask = weight_plt.daygrp.isin(weight_timegrp)
+    fig = px.line(weight_plt[mask],
+                 x = 'datetime', y='reading', color='weightsensor')
     return fig
 
 #app.run_server(debug=False, host='0.0.0.0', port=8050)
