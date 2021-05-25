@@ -6,7 +6,7 @@ import psycopg2
 usb_port = '/dev/ttyACM0' # Arduino Port
 
 #---------- SQL DataBase Details -------
-db = subprocess.run('heroku config:get DATABASE_URL -a bridgewaterbees',
+db = subprocess.run('/usr/local/bin/heroku config:get DATABASE_URL -a bridgewaterbees',
                               capture_output=True,
                               shell=True)
 

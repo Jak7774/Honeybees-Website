@@ -1,6 +1,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include "DHT.h"
+#include "HX711.h"
 
 /* --- Setup Temperature Sensors --- */
 #define ONE_WIRE_BUS 2 // Temp pins on D2
@@ -17,6 +18,14 @@ DHT dht[] = {
   {DHTPIN2, DHT22},
 };
 
+/* --- Setup Scale Sensors --- */
+#define DOUT_PIN 5
+#define SCK_PIN 6
+
+#define calibration -7050.0 // what is 0?
+
+HX711 scale;
+
 float humidity[2];
 float temperature[2];
 
@@ -28,6 +37,8 @@ void setup(void)
   for (auto& sensor : dht) {
     sensor.begin();
   }
+  scale.begin(DOUT_PIN, SCK_PIN); 
+  scale.set_scale(calibration);
 }
 
 void loop(void){
@@ -60,6 +71,9 @@ void loop(void){
     //Serial.print(": ");
     Serial.print(temperature[i]);
   }
+
+  Serial.print(", ");
+  Serial.print(scale.get_units(), 1);
   
   Serial.println(" ");
   
