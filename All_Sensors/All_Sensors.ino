@@ -1,7 +1,10 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include "DHT.h"
-#include "HX711.h"
+#include <HX711_ADC.h>
+#if defined(ESP8266)|| defined(ESP32) || defined(AVR)
+#include <EEPROM.h>
+#endif
 
 /* --- Setup Temperature Sensors --- */
 #define ONE_WIRE_BUS 2 // Temp pins on D2
@@ -19,26 +22,40 @@ DHT dht[] = {
 };
 
 /* --- Setup Scale Sensors --- */
-#define DOUT_PIN 5
-#define SCK_PIN 6
+const int DOUT_PIN = 5;
+const int SCK_PIN = 6;
 
-#define calibration -7050.0 // what is 0?
-
-HX711 scale;
+//float calibration = 22.20; // Calibration Factor 
+HX711_ADC LoadCell(DOUT_PIN, SCK_PIN);
+const int calVal_eepromAddress = 0;
+unsigned long t = 0;
 
 float humidity[2];
 float temperature[2];
 
-void setup(void)
-{
+void setup(void) {
   // Start Serial Communication for Debugging
-  Serial.begin(9600);
+  //Serial.begin(9600);
+  Serial.begin(57600); delay(10);
+  
   sensors.begin(); // temp sensors
   for (auto& sensor : dht) {
     sensor.begin();
   }
-  scale.begin(DOUT_PIN, SCK_PIN); 
-  scale.set_scale(calibration);
+
+  float calibrationValue;
+  #if defined(ESP8266) || defined(ESP32)
+    EEPROM.begin(512);
+  #endif
+  EEPROM.get(calVal_eepromAddress, calibrationValue);
+  
+  LoadCell.begin();
+  unsigned long stabilizingtime = 2000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
+  boolean _tare = false; //set this to false if you don't want tare to be performed in the next step
+  LoadCell.start(stabilizingtime, _tare);
+  LoadCell.setCalFactor(calibrationValue);
+  LoadCell.update();
+  LoadCell.refreshDataSet();
 }
 
 void loop(void){
@@ -72,9 +89,23 @@ void loop(void){
     Serial.print(temperature[i]);
   }
 
+
+  /* --- Weight Sensor Output --- */
   Serial.print(", ");
-  Serial.print(scale.get_units(), 1);
-  
+  static boolean newDataReady = 0;
+  const int serialPrintInterval = 0;
+
+  if (LoadCell.update()) newDataReady = true;
+
+  if (newDataReady) {
+    if (millis() > t + serialPrintInterval ) {
+      float w = LoadCell.getData();
+      Serial.print(w);
+      newDataReady = 0;
+      t = millis();
+    }
+  }
+ 
   Serial.println(" ");
   
   delay(1000);
