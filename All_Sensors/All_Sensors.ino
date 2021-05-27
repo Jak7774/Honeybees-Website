@@ -21,6 +21,9 @@ DHT dht[] = {
   {DHTPIN2, DHT22},
 };
 
+float humidity[2];
+float temperature[2];
+
 /* --- Setup Scale Sensors --- */
 const int DOUT_PIN = 5;
 const int SCK_PIN = 6;
@@ -30,8 +33,9 @@ HX711_ADC LoadCell(DOUT_PIN, SCK_PIN);
 const int calVal_eepromAddress = 0;
 unsigned long t = 0;
 
-float humidity[2];
-float temperature[2];
+/* -----------------------------
+* Setup Sensors 
+ -----------------------------*/
 
 void setup(void) {
   // Start Serial Communication for Debugging
@@ -39,10 +43,11 @@ void setup(void) {
   Serial.begin(57600); delay(10);
   
   sensors.begin(); // temp sensors
-  for (auto& sensor : dht) {
+  for (auto& sensor : dht) { // DHT Sensors
     sensor.begin();
   }
 
+  // Scales
   float calibrationValue;
   #if defined(ESP8266) || defined(ESP32)
     EEPROM.begin(512);
@@ -57,6 +62,10 @@ void setup(void) {
   LoadCell.update();
   LoadCell.refreshDataSet();
 }
+
+/* -----------------------------
+* Loop to Read Sensors and send to Serial 
+ -----------------------------*/
 
 void loop(void){
   // Call below to issue a global temp and request to all sensors 
@@ -89,7 +98,6 @@ void loop(void){
     Serial.print(temperature[i]);
   }
 
-
   /* --- Weight Sensor Output --- */
   Serial.print(", ");
   static boolean newDataReady = 0;
@@ -105,8 +113,7 @@ void loop(void){
       t = millis();
     }
   }
- 
+
   Serial.println(" ");
-  
   delay(1000);
 }
