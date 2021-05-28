@@ -8,6 +8,11 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 
+tempquery  = " SELECT DateTime, temp1, temp2, temp3, temp4 FROM temps ORDER BY DateTime "
+humidquery = " SELECT DateTime, humid1, humid2 FROM humidity ORDER BY DateTime "
+weightquery = "SELECT DateTime, weight FROM weight ORDER BY DateTime"
+
+
 x = datetime.now() # Current DateTime for Reference
 
 #---------------------------------------
@@ -70,12 +75,11 @@ humid_timegrp_lab = humid_plt.daygrp_lab.unique()
 #---------------------------------------
 
 weight = pd.read_sql(weightquery, con=dbConn)
-
 weight_plt = pd.melt(weight, id_vars=['datetime'], var_name='weightsensor', value_name='reading')
 
 weight_plt['daydiff'] = (x - weight_plt['datetime']) / np.timedelta64(1, 'D')
 weight_plt.loc[weight_plt['daydiff'] <= 1, 'daygrp'] = 1
-weight_plt.loc[(rdgs_plt['daydiff'] > 1) & (weight_plt['daydiff'] <= 7) , 'daygrp'] = 2
+weight_plt.loc[(weight_plt['daydiff'] > 1) & (weight_plt['daydiff'] <= 7) , 'daygrp'] = 2
 weight_plt.loc[(weight_plt['daydiff'] > 7) & (weight_plt['daydiff'] <= 30) , 'daygrp'] = 3
 weight_plt.loc[(weight_plt['daydiff'] > 30) & (weight_plt['daydiff'] <= 90) , 'daygrp'] = 4
 weight_plt.loc[(weight_plt['daydiff'] > 90) & (weight_plt['daydiff'] <= 180) , 'daygrp'] = 5
