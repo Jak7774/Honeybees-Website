@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from upload_setup import *
+from setup import *
 from datetime import datetime
 #import MySQLdb
 import psycopg2
