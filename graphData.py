@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setup import *
+from upload_setup import *
 from datetime import datetime
 #import MySQLdb
 import psycopg2
@@ -52,7 +52,7 @@ humid_plt = pd.melt(humid, id_vars=['datetime'], var_name='humidsensor', value_n
 
 humid_plt['daydiff'] = (x - humid_plt['datetime']) / np.timedelta64(1, 'D')
 humid_plt.loc[humid_plt['daydiff'] <= 1, 'daygrp'] = 1
-humid_plt.loc[(rdgs_plt['daydiff'] > 1) & (humid_plt['daydiff'] <= 7) , 'daygrp'] = 2
+humid_plt.loc[(humid_plt['daydiff'] > 1) & (humid_plt['daydiff'] <= 7) , 'daygrp'] = 2
 humid_plt.loc[(humid_plt['daydiff'] > 7) & (humid_plt['daydiff'] <= 30) , 'daygrp'] = 3
 humid_plt.loc[(humid_plt['daydiff'] > 30) & (humid_plt['daydiff'] <= 90) , 'daygrp'] = 4
 humid_plt.loc[(humid_plt['daydiff'] > 90) & (humid_plt['daydiff'] <= 180) , 'daygrp'] = 5
