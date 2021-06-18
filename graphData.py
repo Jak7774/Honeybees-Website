@@ -23,6 +23,7 @@ rdgs = pd.read_sql(tempquery, con=dbConn)
 
 rdgs_plt = pd.melt(rdgs, id_vars=['datetime'], var_name='tempsensor', value_name='reading')
 rdgs_plt['daydiff'] = (x - rdgs_plt['datetime']) / np.timedelta64(1, 'D')
+
 rdgs_plt.loc[rdgs_plt['daydiff'] <= 1, 'daygrp'] = 1
 rdgs_plt.loc[(rdgs_plt['daydiff'] > 1) & (rdgs_plt['daydiff'] <= 7) , 'daygrp'] = 2
 rdgs_plt.loc[(rdgs_plt['daydiff'] > 7) & (rdgs_plt['daydiff'] <= 30) , 'daygrp'] = 3
@@ -38,6 +39,11 @@ rdgs_plt.loc[rdgs_plt['daygrp'] == 4, 'daygrp_lab'] = "3 Months"
 rdgs_plt.loc[rdgs_plt['daygrp'] == 5, 'daygrp_lab'] = "6 Months"
 rdgs_plt.loc[rdgs_plt['daygrp'] == 6, 'daygrp_lab'] = "12 Months"
 rdgs_plt.loc[rdgs_plt['daygrp'] == 7, 'daygrp_lab'] = "Older still"
+
+rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp1', 'sensor_label'] = "Super"
+rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp2', 'sensor_label'] = "Brood"
+rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp3', 'sensor_label'] = "Outside"
+rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp4', 'sensor_label'] = "Roof"
 
 timegrp = rdgs_plt.daygrp.unique()
 timegrp_lab = rdgs_plt.daygrp_lab.unique()
@@ -66,6 +72,9 @@ humid_plt.loc[humid_plt['daygrp'] == 4, 'daygrp_lab'] = "3 Months"
 humid_plt.loc[humid_plt['daygrp'] == 5, 'daygrp_lab'] = "6 Months"
 humid_plt.loc[humid_plt['daygrp'] == 6, 'daygrp_lab'] = "12 Months"
 humid_plt.loc[humid_plt['daygrp'] == 7, 'daygrp_lab'] = "Older still"
+
+humid_plt.loc[humid_plt['humidsensor'] == 'humid1', 'sensor_label'] = "Outside"
+humid_plt.loc[humid_plt['humidsensor'] == 'humid2', 'sensor_label'] = "Roof"
 
 humid_timegrp = humid_plt.daygrp.unique()
 humid_timegrp_lab = humid_plt.daygrp_lab.unique()

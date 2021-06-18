@@ -51,7 +51,10 @@ app.layout = html.Div([
 def update_line_chart(timegrp):
     mask = rdgs_plt.daygrp.isin(timegrp)
     fig = px.line(rdgs_plt[mask],
-                 x = 'datetime', y='reading', color='tempsensor')
+                 x = 'datetime', y='reading', color='sensor_label',
+                  labels={'datetime': "Date & Time of Reading",
+                          'reading': "Sensor Value",
+                          'sensor_label': "Sensor Location"})
     return fig
 
 @app.callback(
@@ -61,7 +64,14 @@ def update_line_chart(timegrp):
 def update_line_chart(humid_timegrp):
     mask = humid_plt.daygrp.isin(humid_timegrp)
     fig = px.line(humid_plt[mask],
-                 x = 'datetime', y='reading', color='humidsensor')
+                 x = 'datetime', y='reading', color='sensor_label',
+                  labels={'datetime': "Date & Time of Reading",
+                          'reading': "Sensor Value",
+                          'sensor_label': "Sensor Location"})
+#     fig.update_layout(legend=dict(
+#         orientation="h",
+#         yanchor="bottom", y=1.02,
+#         xanchor="right", x=1))
     return fig
 
 @app.callback(
@@ -72,6 +82,7 @@ def update_line_chart(weight_timegrp):
     mask = weight_plt.daygrp.isin(weight_timegrp)
     fig = px.line(weight_plt[mask],
                  x = 'datetime', y='reading', color='weightsensor')
+    fig.update_layout(showlegend=False) # Only 1 Reading so not needed
     return fig
 
 #app.run_server(debug=False, host='0.0.0.0', port=8050)
