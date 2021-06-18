@@ -81,7 +81,9 @@ def update_line_chart(humid_timegrp):
 def update_line_chart(weight_timegrp):
     mask = weight_plt.daygrp.isin(weight_timegrp)
     fig = px.line(weight_plt[mask],
-                 x = 'datetime', y='reading', color='weightsensor')
+                 x = 'datetime', y='reading', color='weightsensor',
+                  labels={'datetime': "Date & Time of Reading",
+                          'reading': "Sensor Value"})
     fig.update_layout(showlegend=False) # Only 1 Reading so not needed
     return fig
 
