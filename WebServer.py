@@ -54,7 +54,8 @@ def update_line_chart(timegrp):
                  x = 'datetime', y='reading', color='sensor_label',
                   labels={'datetime': "Date & Time of Reading",
                           'reading': "Sensor Value",
-                          'sensor_label': "Sensor Location"})
+                          'sensor_label': "Sensor Location"},
+                  title="Temperature")
     return fig
 
 @app.callback(
@@ -67,7 +68,8 @@ def update_line_chart(humid_timegrp):
                  x = 'datetime', y='reading', color='sensor_label',
                   labels={'datetime': "Date & Time of Reading",
                           'reading': "Sensor Value",
-                          'sensor_label': "Sensor Location"})
+                          'sensor_label': "Sensor Location"},
+                  title="Humidity")
 #     fig.update_layout(legend=dict(
 #         orientation="h",
 #         yanchor="bottom", y=1.02,
@@ -80,10 +82,12 @@ def update_line_chart(humid_timegrp):
 
 def update_line_chart(weight_timegrp):
     mask = weight_plt.daygrp.isin(weight_timegrp)
-    fig = px.line(weight_plt[mask],
+    fig = px.scatter(weight_plt[mask],
                  x = 'datetime', y='reading', color='weightsensor',
                   labels={'datetime': "Date & Time of Reading",
-                          'reading': "Sensor Value"})
+                          'reading': "Sensor Value"},
+                     trendline="lowess",
+                     title="Weight (Kg)")
     fig.update_layout(showlegend=False) # Only 1 Reading so not needed
     return fig
 
