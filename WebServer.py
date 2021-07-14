@@ -13,7 +13,7 @@ server = app.server
 
 app.layout = html.Div([
     # Temp Sensors
-    dcc.Textarea(id="temp", value="Temperature", style={'width': '100%'},),
+    dcc.Textarea(id='temp', value='Temperature', style={'width': '100%'}),
     dcc.Checklist(
         id = 'checklist1', # How to choose group category
         options=[
@@ -25,7 +25,7 @@ app.layout = html.Div([
     dcc.Graph(id='line-chart1'),
     
     # Humid Sensors
-    dcc.Textarea(id="temp", value="Humidity", style={'width': '100%'},),
+    dcc.Textarea(id='humid', value='Humidity', style={'width': '100%'}),
     dcc.Checklist(
         id = 'checklist2', # How to choose group category
         options=[{'label': x, 'value': y}
@@ -36,7 +36,7 @@ app.layout = html.Div([
     dcc.Graph(id='line-chart2'),
 
     #Weight Sensors
-    dcc.Textarea(id="temp", value="Weight (Kg)", style={'width': '100%'},),
+    dcc.Textarea(id='weight', value='Weight (Kg)', style={'width': '100%'}),
     dcc.Checklist(
         id = 'checklist3', # How to choose group category
         options=[{'label': x, 'value': y}
