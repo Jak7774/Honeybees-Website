@@ -13,7 +13,6 @@ server = app.server
 
 app.layout = html.Div([
     # Temp Sensors
-    dcc.Textarea(id='temp', value='Temperature', style={'width': '100%'}),
     dcc.Checklist(
         id = 'checklist1', # How to choose group category
         options=[
@@ -25,7 +24,6 @@ app.layout = html.Div([
     dcc.Graph(id='line-chart1'),
     
     # Humid Sensors
-    dcc.Textarea(id='humid', value='Humidity', style={'width': '100%'}),
     dcc.Checklist(
         id = 'checklist2', # How to choose group category
         options=[{'label': x, 'value': y}
@@ -36,7 +34,6 @@ app.layout = html.Div([
     dcc.Graph(id='line-chart2'),
 
     #Weight Sensors
-    dcc.Textarea(id='weight', value='Weight (Kg)', style={'width': '100%'}),
     dcc.Checklist(
         id = 'checklist3', # How to choose group category
         options=[{'label': x, 'value': y}
@@ -57,7 +54,8 @@ def update_line_chart(timegrp):
                  x = 'datetime', y='reading', color='sensor_label',
                   labels={'datetime': "Date & Time of Reading",
                           'reading': "Sensor Value",
-                          'sensor_label': "Sensor Location"})
+                          'sensor_label': "Sensor Location"},
+                  title="Temperature")
     return fig
 
 @app.callback(
@@ -70,7 +68,8 @@ def update_line_chart(humid_timegrp):
                  x = 'datetime', y='reading', color='sensor_label',
                   labels={'datetime': "Date & Time of Reading",
                           'reading': "Sensor Value",
-                          'sensor_label': "Sensor Location"})
+                          'sensor_label': "Sensor Location"},
+                  title="Humidity")
 #     fig.update_layout(legend=dict(
 #         orientation="h",
 #         yanchor="bottom", y=1.02,
@@ -86,12 +85,13 @@ def update_line_chart(weight_timegrp):
     fig = px.line(weight_plt[mask],
                  x = 'datetime', y='reading', color='weightsensor',
                   labels={'datetime': "Date & Time of Reading",
-                          'reading': "Sensor Value"})
+                          'reading': "Sensor Value"},
+                  title="Weight (Kg)")
     fig.update_layout(showlegend=False) # Only 1 Reading so not needed
     return fig
 
 #app.run_server(debug=False, host='0.0.0.0', port=8050)
 
 if __name__ == '__main__':
-    app.run_server(debug=True) 
+    app.run_server(debug=True)
 
