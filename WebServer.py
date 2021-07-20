@@ -87,7 +87,7 @@ def update_line_chart(weight_timegrp):
                   labels={'datetime': "Date & Time of Reading",
                           'reading': "Sensor Value"},
                   title="Weight (Kg)")
-    wfig.update_traces(marker_symbol="circle-open", opacity=0.6)
+    wfig.update_traces(marker_symbol="circle-open")
     wfig.update_layout(showlegend=False) # Only 1 Reading so not needed
     return wfig
 
