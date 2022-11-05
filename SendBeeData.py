@@ -17,6 +17,7 @@ temp_super, temp_brood, humid_out, temp_out, humid_in, temp_roof, weight = read_
 now = datetime.datetime.now()
 now = now.strftime("%Y-%m-%d %H:%M:%S")
 
+weight = weight.replace('\r\n', '')
 
 jsonData = {  'created_at': now,
     'weight': weight,
@@ -27,7 +28,5 @@ jsonData = {  'created_at': now,
     'humid_in': humid_in,
     'humid_out': humid_out}
 
-
-
+# x = requests.post('https://givebeesachance.herokuapp.com/hiveData', json = jsonData)
 x = requests.post('url', json = jsonData)
-

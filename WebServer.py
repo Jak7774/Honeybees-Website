@@ -8,8 +8,21 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+# Check if Temp Sensor has errors - add to a list to print in warning
+glabs = []
+tlabs = ['Super', 'Brood', 'Outside', 'Roof']
+tvars = ['temp1', 'temp2', 'temp3', 'temp4']
+for f, l in zip(tvars, tlabs):
+    if f in error_fields:
+        glabs.append(l)
+
+# Create Graphs
+
 app = dash.Dash(__name__)
 server = app.server
+
+if len(glabs) > 0 :
+    print(f"Error with Temp Readings: {', '.join(glabs)}")
 
 app.layout = html.Div([
     # Temp Sensors
