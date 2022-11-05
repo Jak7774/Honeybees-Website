@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from setup import *
+#from setup import *
+from upload_setup import *
 from datetime import datetime
 #import MySQLdb
 import psycopg2
@@ -21,6 +22,21 @@ x = datetime.now() # Current DateTime for Reference
 
 rdgs = pd.read_sql(tempquery, con=dbConn)
 
+#-------- Data Tidy Up
+error_fields = []
+
+def replace_value(value, field):
+    global error_fields
+    if value < -15 or value > 100:
+        if field not in error_fields:
+            error_fields.append(field)
+        return None
+    else:
+        return value
+  
+for field in ['temp1', 'temp2', 'temp3', 'temp4']:
+    rdgs[field] = rdgs.apply(lambda row: replace_value(row[field], field), axis=1)
+    
 rdgs_plt = pd.melt(rdgs, id_vars=['datetime'], var_name='tempsensor', value_name='reading')
 rdgs_plt['daydiff'] = (x - rdgs_plt['datetime']) / np.timedelta64(1, 'D')
 
@@ -45,6 +61,7 @@ rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp2', 'sensor_label'] = "Brood"
 rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp3', 'sensor_label'] = "Outside"
 rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp4', 'sensor_label'] = "Roof"
 
+# Create the Timegroups
 timegrp = rdgs_plt.daygrp.unique()
 timegrp_lab = rdgs_plt.daygrp_lab.unique()
 

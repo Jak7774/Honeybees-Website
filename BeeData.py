@@ -42,4 +42,4 @@ def inputSQL(temp, humid, weight):
     dbConn.commit()
 
 arduino = serial.Serial(usb_port, 9600)
-arduino.flush()            
+arduino.flush()
