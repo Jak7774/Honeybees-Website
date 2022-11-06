@@ -56,10 +56,14 @@ rdgs_plt.loc[rdgs_plt['daygrp'] == 5, 'daygrp_lab'] = "6 Months"
 rdgs_plt.loc[rdgs_plt['daygrp'] == 6, 'daygrp_lab'] = "12 Months"
 rdgs_plt.loc[rdgs_plt['daygrp'] == 7, 'daygrp_lab'] = "Older still"
 
-rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp1', 'sensor_label'] = "Super"
+# rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp1', 'sensor_label'] = "Super"
+rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp1', 'sensor_label'] = "Outside"
 rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp2', 'sensor_label'] = "Brood"
-rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp3', 'sensor_label'] = "Outside"
-rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp4', 'sensor_label'] = "Roof"
+# rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp3', 'sensor_label'] = "Outside"
+rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp3', 'sensor_label'] = "Super"
+# rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp4', 'sensor_label'] = "Roof"
+rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp4', 'sensor_label'] = "Outside (Duel)"
+
 
 # Create the Timegroups
 timegrp = rdgs_plt.daygrp.unique()
@@ -90,8 +94,10 @@ humid_plt.loc[humid_plt['daygrp'] == 5, 'daygrp_lab'] = "6 Months"
 humid_plt.loc[humid_plt['daygrp'] == 6, 'daygrp_lab'] = "12 Months"
 humid_plt.loc[humid_plt['daygrp'] == 7, 'daygrp_lab'] = "Older still"
 
-humid_plt.loc[humid_plt['humidsensor'] == 'humid1', 'sensor_label'] = "Outside"
-humid_plt.loc[humid_plt['humidsensor'] == 'humid2', 'sensor_label'] = "Roof"
+# humid_plt.loc[humid_plt['humidsensor'] == 'humid1', 'sensor_label'] = "Outside"
+humid_plt.loc[humid_plt['humidsensor'] == 'humid1', 'sensor_label'] = "Super"
+# humid_plt.loc[humid_plt['humidsensor'] == 'humid2', 'sensor_label'] = "Roof"
+humid_plt.loc[humid_plt['humidsensor'] == 'humid2', 'sensor_label'] = "Outside"
 
 humid_timegrp = humid_plt.daygrp.unique()
 humid_timegrp_lab = humid_plt.daygrp_lab.unique()
