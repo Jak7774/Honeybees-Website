@@ -62,7 +62,7 @@ rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp2', 'sensor_label'] = "Brood"
 # rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp3', 'sensor_label'] = "Outside"
 rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp3', 'sensor_label'] = "Super"
 # rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp4', 'sensor_label'] = "Roof"
-rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp4', 'sensor_label'] = "Outside (Duel)"
+rdgs_plt.loc[rdgs_plt['tempsensor'] == 'temp4', 'sensor_label'] = "Outside (Dual)"
 
 
 # Create the Timegroups
