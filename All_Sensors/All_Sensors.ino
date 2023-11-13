@@ -1,37 +1,48 @@
+/*
+   -------------------------------------------------------------------------------------
+   All Sensors
+   Read All Sensors from the BeeHive and send to Pi for processing
+   Jack Elkes
+   11NOV2023
+   -------------------------------------------------------------------------------------
+*/
+
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include "DHT.h"
+#include <Arduino.h>
+#include <Wire.h>
+#include "Adafruit_SHT31.h"
+#include <HX711_ADC.h>
+
 #include <HX711_ADC.h>
 #if defined(ESP8266)|| defined(ESP32) || defined(AVR)
 #include <EEPROM.h>
 #endif
 
 /* --- Setup Temperature Sensors --- */
-#define ONE_WIRE_BUS 2 // Temp pins on D2
-OneWire oneWire(ONE_WIRE_BUS);
+#define ONE_WIRE_BUS 2 // Temp pins on D2 
+OneWire oneWire(ONE_WIRE_BUS); 
 DallasTemperature sensors(&oneWire);
 
 /* --- Seupt Humidity Sensors ---*/
-#define DHTTYPE DHT22
-#define DHTPIN1 3
-#define DHTPIN2 4
+Adafruit_SHT31 sht31 = Adafruit_SHT31(); float temp[2]; float humid[2];
 
-DHT dht[] = {
-  {DHTPIN1, DHT22},
-  {DHTPIN2, DHT22},
-};
-
-float humidity[2];
-float temperature[2];
+/* Analogue Transmission of Data */
+void TCA9548A(uint8_t bus){
+  Wire.beginTransmission(0x71);  // TCA9548A address is 0x70
+  Wire.write(1 << bus);          // send byte to select bus
+  Wire.endTransmission();
+  //Serial.print(bus);
+}
 
 /* --- Setup Scale Sensors --- */
-const int DOUT_PIN = 5;
-const int SCK_PIN = 6;
+const int HX711_dout = 5; //mcu > HX711 dout pin
+const int HX711_sck = 6; //mcu > HX711 sck pin
 
-//float calibration = 22.20; // Calibration Factor
-HX711_ADC LoadCell(DOUT_PIN, SCK_PIN);
-const int calVal_eepromAddress = 0;
+//HX711 constructor:
+HX711_ADC LoadCell(HX711_dout, HX711_sck);
 unsigned long t = 0;
+const int calVal_eepromAdress = 0;
 
 /* -----------------------------
   Setup Sensors
@@ -39,34 +50,34 @@ unsigned long t = 0;
 
 void setup(void) {
   // Start Serial Communication for Debugging
-  Serial.begin(9600); delay(10);
+  Serial.begin(9600);
 
   sensors.begin(); // temp sensors
-  for (auto& sensor : dht) { // DHT Sensors
-    sensor.begin();
-  }
+
+  // SHT31 Sensors
+  sht31.begin(0x44);
+  Wire.begin();
 
   // Scales
-  LoadCell.begin();
-
-  float calibrationValue;
+  float calibrationValue; // calibration value
+  //calibrationValue = 696.0; // uncomment this if you want to set this value in the sketch
 #if defined(ESP8266) || defined(ESP32)
-  EEPROM.begin(512);
+  EEPROM.begin(512); // uncomment this if you use ESP8266 and want to fetch this value from eeprom
 #endif
-  EEPROM.get(calVal_eepromAddress, calibrationValue); // 27MAY2021 Value = -22.75
+  EEPROM.get(calVal_eepromAdress, calibrationValue); // uncomment this if you want to fetch this value from eeprom
 
-  unsigned long stabilizingtime = 2000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
+  LoadCell.begin();
+  //LoadCell.setReverseOutput();
+  unsigned long stabilizingtime = 2000; // tare preciscion can be improved by adding a few seconds of stabilizing time
   boolean _tare = false; //set this to false if you don't want tare to be performed in the next step
   LoadCell.start(stabilizingtime, _tare);
   if (LoadCell.getTareTimeoutFlag()) {
-    Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
-    while (1);
+    //Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
   }
   else {
-    LoadCell.setCalFactor(calibrationValue); // set calibration value (float)
+    LoadCell.setCalFactor(calibrationValue); // set calibration factor (float)
     //Serial.println("Startup is complete");
   }
-
 }
 
 /* -----------------------------
@@ -86,40 +97,32 @@ void loop(void) {
   Serial.print(", ");
   Serial.print(sensors.getTempCByIndex(1));
 
-  //DHT Humidity Sensors
-  for (int i = 0; i < 2; i++) {
-    temperature[i] = dht[i].readTemperature();
-    humidity[i] = dht[i].readHumidity();
-  }
+  Serial.print(", ");
 
+  // SHT31 Humidity Sensors
   for (int i = 0; i < 2; i++) {
-    Serial.print(F(", "));
-    //Serial.print(i);
-    //Serial.print(": ");
-    Serial.print(humidity[i]);
-    //Serial.print(F("%"));
-    Serial.print(F(", "));
-    //Serial.print(i + 3);
-    //Serial.print(": ");
-    Serial.print(temperature[i]);
+    TCA9548A(i);
+    temp[i] = sht31.readTemperature();
+    humid[i] = sht31.readHumidity();
+    Serial.print(humid[i]);
+    Serial.print(", ");
+    Serial.print(temp[i]);
+    Serial.print(", ");
   }
 
   /* --- Weight Sensor Output --- */
-  Serial.print(", ");
   static boolean newDataReady = 0;
-  const int serialPrintInterval = 0;
-
   if (LoadCell.update()) newDataReady = true;
 
+  // get smoothed value from the dataset:
   if (newDataReady) {
-    if (millis() > t + serialPrintInterval ) {
+    if (millis() > t ) {
       float w = LoadCell.getData();
       Serial.print(w);
       newDataReady = 0;
       t = millis();
     }
   }
-
   Serial.println(" ");
-  delay(1000);
+  //delay(1000);
 }

@@ -31,7 +31,7 @@ app.layout = html.Div([
         options=[
             {'label': x, 'value': y}
                  for x,y in zip(timegrp_lab, timegrp)], # Loop through to choose Label/Value for Checkbox
-        value = timegrp[-3:], # Specify Starting Value
+        value = timegrp, # Specify Starting Value
         labelStyle={'display': 'inline-block'}
     ),
     dcc.Graph(id='line-chart1'),
@@ -41,7 +41,7 @@ app.layout = html.Div([
         id = 'checklist2', # How to choose group category
         options=[{'label': x, 'value': y}
                  for x,y in zip(humid_timegrp_lab, humid_timegrp)], # Loop through to choose Label/Value for Checkbox
-        value = humid_timegrp[-3:], # Specify Starting Value
+        value = humid_timegrp, # Specify Starting Value
         labelStyle={'display': 'inline-block'}
     ),
     dcc.Graph(id='line-chart2'),
@@ -51,7 +51,7 @@ app.layout = html.Div([
         id = 'checklist3', # How to choose group category
         options=[{'label': x, 'value': y}
                  for x,y in zip(weight_timegrp_lab, weight_timegrp)], # Loop through to choose Label/Value for Checkbox
-        value = weight_timegrp[-3:], # Specify Starting Value
+        value = weight_timegrp, # Specify Starting Value
         labelStyle={'display': 'inline-block'}
     ),
     dcc.Graph(id='line-chart3'),
