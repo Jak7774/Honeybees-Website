@@ -28,5 +28,7 @@ jsonData = {  'created_at': now,
     'humid_in': humid_in,
     'humid_out': humid_out}
 
-# x = requests.post('https://givebeesachance.herokuapp.com/hiveData', json = jsonData)
-x = requests.post('url', json = jsonData)
+url ='https://bridgewaterbees.herokuapp.com/hiveData'
+response = requests.post(url, json = jsonData)
+
+print("Response:" , response.text)

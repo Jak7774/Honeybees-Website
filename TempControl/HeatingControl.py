@@ -47,7 +47,7 @@ class HeatingControl:
     def _heating_thread(self):
         while self.heating_enabled and not self.stop_request.is_set():
             print("Begin Fast Heat Cycle")
-            self.cycle(duration_on=180, duration_off=30, cycles=10)
+            self.cycle(duration_on=120, duration_off=30, cycles=10)
             print("Level off that heat")
             self.cycle(duration_on=60, duration_off=30, cycles=10)  # Adjust cycles as needed
             print("Time to maintain")
@@ -66,9 +66,11 @@ def main():
     # Set up heating control
     relay_pin = 14  # Replace with the actual GPIO pin for your relay switch
     heating_control = HeatingControl(relay_pin, arduino_serial)
-
+    
+    timeout = 1200
+    running = True
     try:
-        while True:
+        while running:
             if heating_control.is_heating():
                 status = "High"
             else:
@@ -77,30 +79,37 @@ def main():
             temp_brood, temp_outside = read_temperatures(arduino_serial)
             print(f"Brood temperature: {temp_brood}°C, ", f"Outside temperature: {temp_outside}°C,", f"Pin Status: {status}")
             
-
-            if temp_brood < 20 and temp_brood > -50 and not heating_control.heating_enabled:
+            if temp_brood < 15 and temp_brood > -50 and not heating_control.heating_enabled:
                 # Activate heating function
                 print("Activating heating...")
                 heating_control.start_heating()
 
-            elif temp_brood > 25 and heating_control.heating_enabled:
+            elif temp_brood > 15 and heating_control.heating_enabled:
                 # Turn off heating function
-                print("Brood temperature above 25°C. Turning off heating.")
+                print("Brood temperature above 15°C. Turning off heating.")
                 heating_control.stop_heating()
+            
             arduino_serial.close_connection()
             
             elapsed_time = time.time() - heating_control.start_time
-            if elapsed_time >= 1200:
+            if elapsed_time >= timeout: # 1200 = 5 Minutes
                 print("Script has run for 20mins, exiting.")
                 heating_control.stop_heating()
-                break
+                running = False 
+                #break
             
-            sleep(5)  # Adjust the sleep duration as needed
-
+            sleep(30)  # Adjust the sleep duration as needed
+        
     except KeyboardInterrupt:
         print("Program terminated by user.")
         heating_control.stop_heating()
-        arduino.close()
-
+        arduino_serial.close_connection()
+        running = False
+        
+    finally:
+         arduino_serial.close_connection()
+         if heating_control.heating_enabled:
+             heating_control.stop_heating()
+         
 if __name__ == "__main__":
     main()
