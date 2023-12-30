@@ -1,3 +1,10 @@
+/*---------------------------------------------------------------------
+  - BeeHive Data - Sensor Readings
+  - Jack Elkes
+  - Old Version of Code (code for weight incorrect)
+  - Sept2023
+---------------------------------------------------------------------*/
+
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <Arduino.h>
