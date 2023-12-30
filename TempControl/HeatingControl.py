@@ -67,7 +67,7 @@ def main():
     relay_pin = 14  # Replace with the actual GPIO pin for your relay switch
     heating_control = HeatingControl(relay_pin, arduino_serial)
     
-    timeout = 60
+    timeout = 1200
     running = True
     try:
         while running:
