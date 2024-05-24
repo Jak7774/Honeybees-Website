@@ -16,14 +16,10 @@ database_url = os.environ.get('DATABASE_URL')
 
 # Update the connection string if it starts with 'postgres://'
 if database_url and database_url.startswith('postgres://'):
-    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    database_url = database_url.replace('postgres://', 'postgresql+psycopg2://', 1)
 
 # Configure SQLAlchemy with the database URL
-if ENV == 'dev':
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:raspberry@localhost/SensorReadings'
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://u9u56fk5g95imm:p2a8d746250036cd553e0331dfebe855917138e31d8228f90330b5d36afe81602@c7u1tn6bvvsodf.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com:5432/d3ulk01mjuja5j"
-
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql+psycopg2://postgres:raspberry@localhost/SensorReadings'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
