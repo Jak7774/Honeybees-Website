@@ -4,20 +4,24 @@ from flask_sqlalchemy import SQLAlchemy
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 import os
+#import psycopg2
 from datetime import datetime, timedelta
 
-# Connect to PostGres Database
-import os
-import psycopg2
-# DATABASE_URL = os.environ['DATABASE_URL']
-# conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'postgresql+psycopg2://postgres:raspberry@localhost/SensorReadings'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:raspberry@localhost/SensorReadings'
+
+# Use the DATABASE_URL environment variable provided by Heroku
+database_url = os.environ.get('DATABASE_URL')
+
+# Update the connection string if it starts with 'postgres://'
+if database_url and database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql+psycopg2://', 1)
+
+# Configure SQLAlchemy with the database URL
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql+psycopg2://postgres:raspberry@localhost/SensorReadings'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
 class Timestamp(db.Model):
