@@ -15,7 +15,7 @@ import psycopg2
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DATABASE_URL') or 'postgresql://postgres:raspberry@localhost/SensorReadings'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'postgresql://postgres:raspberry@localhost/SensorReadings'
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:raspberry@localhost/SensorReadings'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
