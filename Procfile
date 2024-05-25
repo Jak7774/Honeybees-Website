@@ -1,2 +1,2 @@
 worker: python CreateTables.py
-web: gunicorn BeeServer:server
+web: gunicorn BeeServer:app
