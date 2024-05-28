@@ -149,5 +149,30 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+@app.route('/post_endpoint', methods=['POST'])
+def post_endpoint():
+    if request.method == 'POST':
+        try:
+            data = request.form.to_dict()
+            timestamp_str = data.get('timestamp')
+            values_str = data.get('values')
+            
+            if not timestamp_str or not values_str:
+                return jsonify({"error": "Missing timestamp or values"}), 400
+
+            timestamp = Timestamp(timestamp=timestamp_str)
+            db.session.add(timestamp)
+            db.session.commit()
+
+            values_list = [float(val) for val in values_str.split(',')]
+            for val in values_list:
+                value = Value(timestamp_id=timestamp.id, value=val)
+                db.session.add(value)
+            
+            db.session.commit()
+            return jsonify({"message": "Data added successfully"}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
