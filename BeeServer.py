@@ -43,7 +43,7 @@ def get_timestamps_with_values():
             values = [value.value for value in timestamp.values]
             data.append({'timestamp': timestamp.timestamp, 'values': values})
         # Sort the data by timestamps
-        data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%m/%d/%YT%H:%M:%S'))
+        data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
         return data
 
 @app.route('/')
