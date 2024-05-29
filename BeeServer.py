@@ -3,7 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 import matplotlib
 matplotlib.use('Agg')
+from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
+
 
 import os
 #import psycopg2
@@ -77,6 +79,7 @@ def index():
     weight = [entry['values'][6] for entry in timestamps_data]
 
     # Plotting
+    maxtick = 10
     plt.figure(figsize=(12, 6))
 
     # Temperature plot
@@ -89,6 +92,7 @@ def index():
     plt.xlabel('Timestamp')
     plt.ylabel('Temperature (°C)')
     plt.legend()
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
     plt.tight_layout()
 
     # Ensure the directory for saving the plot exists
@@ -105,9 +109,11 @@ def index():
     plt.figure(figsize=(12, 6))
     plt.plot(timestamps, humidity1, color='cyan', label='Outside')
     plt.plot(timestamps, humidity2, color='magenta', label='Roof')
+
     plt.title('Humidity Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Humidity (%)')
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
     plt.legend()
     plt.tight_layout()
 
@@ -119,9 +125,11 @@ def index():
     # Plotting Weight
     plt.figure(figsize=(12, 6))
     plt.plot(timestamps, weight, color='black', label='Weight')
+
     plt.title('Weight Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Weight (kg)')
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
     plt.legend()
     plt.tight_layout()
 
@@ -175,4 +183,4 @@ def post_endpoint():
             return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
