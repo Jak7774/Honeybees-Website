@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import os
 #import psycopg2
 from datetime import datetime, timedelta
-import random
 
 app = Flask(__name__)
 
@@ -48,6 +47,16 @@ def get_timestamps_with_values():
         data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
         return data
 
+# Function to filter data points for specific times of the day
+def filter_data_for_times(timestamps_data, times):
+    filtered_data = []
+    for entry in timestamps_data:
+        timestamp_str = entry['timestamp']
+        timestamp = datetime.strptime(timestamp_str, '%d/%m/%YT%H:%M:%S')
+        if timestamp.strftime('%H:%M:%S') in times:
+            filtered_data.append(entry)
+    return filtered_data
+
 @app.route('/')
 def index():
     # Set default start_date and end_date to last 7 days
@@ -60,7 +69,7 @@ def index():
     if 'end_date' in request.args:
         end_date = request.args['end_date']
 
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values()    
 
     # Filter data by date range if start_date and end_date are provided
     if start_date and end_date:
@@ -68,18 +77,22 @@ def index():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
     
+    # Define the specific times of the day to include in the filtered data
+    specific_times = ['00:00:00', '06:00:00', '12:00:00', '18:00:00']
+    filtered_data = filter_data_for_times(timestamps_data, specific_times)
+
     # Extracting data
-    timestamps = [entry['timestamp'] for entry in timestamps_data]
-    temp1 = [entry['values'][0] for entry in timestamps_data]
-    temp2 = [entry['values'][1] for entry in timestamps_data]
-    temp3 = [entry['values'][3] for entry in timestamps_data]
-    temp4 = [entry['values'][5] for entry in timestamps_data]
-    humidity1 = [entry['values'][2] for entry in timestamps_data]
-    humidity2 = [entry['values'][4] for entry in timestamps_data]
-    weight = [entry['values'][6] for entry in timestamps_data]
+    timestamps = [entry['timestamp'] for entry in filtered_data]
+    temp1 = [entry['values'][0] for entry in filtered_data]
+    temp2 = [entry['values'][1] for entry in filtered_data]
+    temp3 = [entry['values'][3] for entry in filtered_data]
+    temp4 = [entry['values'][5] for entry in filtered_data]
+    humidity1 = [entry['values'][2] for entry in filtered_data]
+    humidity2 = [entry['values'][4] for entry in filtered_data]
+    weight = [entry['values'][6] for entry in filtered_data]
 
     # Plotting
-    maxtick = 6
+    maxtick = 10
     plt.figure(figsize=(12, 6))
 
     # Temperature plot
@@ -91,8 +104,8 @@ def index():
     plt.title('Temperature Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Temperature (°C)')
-    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
     plt.legend()
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
     plt.tight_layout()
 
     # Ensure the directory for saving the plot exists
@@ -109,6 +122,7 @@ def index():
     plt.figure(figsize=(12, 6))
     plt.plot(timestamps, humidity1, color='cyan', label='Outside')
     plt.plot(timestamps, humidity2, color='magenta', label='Roof')
+
     plt.title('Humidity Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Humidity (%)')
@@ -124,6 +138,7 @@ def index():
     # Plotting Weight
     plt.figure(figsize=(12, 6))
     plt.plot(timestamps, weight, color='black', label='Weight')
+
     plt.title('Weight Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Weight (kg)')
@@ -137,7 +152,8 @@ def index():
     plt.close()
 
     # Rendering template with the plot paths
-    return render_template('index.html', temp_plot_path='/static/temperature_plot.png', 
+    return render_template('index.html', 
+                           temp_plot_path='/static/temperature_plot.png', 
                            humidity_plot_path='/static/humidity_plot.png', 
                            weight_plot_path='/static/weight_plot.png',
                            timestamps=timestamps,
@@ -181,4 +197,4 @@ def post_endpoint():
             return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
