@@ -78,6 +78,7 @@ def index():
     weight = [entry['values'][6] for entry in timestamps_data]
 
     # Plotting
+    maxtick = 6
     plt.figure(figsize=(12, 6))
 
     # Temperature plot
@@ -89,6 +90,7 @@ def index():
     plt.title('Temperature Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Temperature (°C)')
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
     plt.legend()
     plt.tight_layout()
 
@@ -109,6 +111,7 @@ def index():
     plt.title('Humidity Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Humidity (%)')
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
     plt.legend()
     plt.tight_layout()
 
@@ -123,6 +126,7 @@ def index():
     plt.title('Weight Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Weight (kg)')
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
     plt.legend()
     plt.tight_layout()
 
