@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
-
+import random
 
 import os
 #import psycopg2
@@ -48,6 +48,10 @@ def get_timestamps_with_values():
         data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
         return data
 
+def is_within_time_range(timestamp_str, start_hour, end_hour):
+    timestamp = datetime.strptime(timestamp_str, '%d/%m/%YT%H:%M:%S')
+    return start_hour <= timestamp.hour < end_hour
+
 @app.route('/')
 def index():
     # Set default start_date and end_date to last 7 days
@@ -60,7 +64,7 @@ def index():
     if 'end_date' in request.args:
         end_date = request.args['end_date']
 
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values()    
 
     # Filter data by date range if start_date and end_date are provided
     if start_date and end_date:
@@ -68,15 +72,42 @@ def index():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
     
+    # Sample datapoints based on time intervals
+    sampled_data = []
+    for entry in timestamps_data:
+        # Initialize counters for each time interval
+        intervals = {'1-6AM': 0, '6AM-12PM': 0, '12PM-8PM': 0, '8PM-12AM': 0}
+        # Shuffle the values for each date
+        values = entry['values']
+        random.shuffle(values)
+        # Sample up to 2 datapoints per time interval
+        for value in values:
+            timestamp_str = entry['timestamp']
+            if is_within_time_range(timestamp_str, 1, 6) and intervals['1-6AM'] < 2:
+                sampled_data.append({'timestamp': timestamp_str, 'value': value})
+                intervals['1-6AM'] += 1
+            elif is_within_time_range(timestamp_str, 6, 12) and intervals['6AM-12PM'] < 2:
+                sampled_data.append({'timestamp': timestamp_str, 'value': value})
+                intervals['6AM-12PM'] += 1
+            elif is_within_time_range(timestamp_str, 12, 20) and intervals['12PM-8PM'] < 2:
+                sampled_data.append({'timestamp': timestamp_str, 'value': value})
+                intervals['12PM-8PM'] += 1
+            elif is_within_time_range(timestamp_str, 20, 24) and intervals['8PM-12AM'] < 2:
+                sampled_data.append({'timestamp': timestamp_str, 'value': value})
+                intervals['8PM-12AM'] += 1
+            # Break if all intervals have 2 datapoints
+            if all(count == 2 for count in intervals.values()):
+                break
+
     # Extracting data
-    timestamps = [entry['timestamp'] for entry in timestamps_data]
-    temp1 = [entry['values'][0] for entry in timestamps_data]
-    temp2 = [entry['values'][1] for entry in timestamps_data]
-    temp3 = [entry['values'][3] for entry in timestamps_data]
-    temp4 = [entry['values'][5] for entry in timestamps_data]
-    humidity1 = [entry['values'][2] for entry in timestamps_data]
-    humidity2 = [entry['values'][4] for entry in timestamps_data]
-    weight = [entry['values'][6] for entry in timestamps_data]
+    timestamps = [entry['timestamp'] for entry in sampled_data]
+    temp1 = [entry['values'][0] for entry in sampled_data]
+    temp2 = [entry['values'][1] for entry in sampled_data]
+    temp3 = [entry['values'][3] for entry in sampled_data]
+    temp4 = [entry['values'][5] for entry in sampled_data]
+    humidity1 = [entry['values'][2] for entry in sampled_data]
+    humidity2 = [entry['values'][4] for entry in sampled_data]
+    weight = [entry['values'][6] for entry in sampled_data]
 
     # Plotting
     maxtick = 10
@@ -139,7 +170,8 @@ def index():
     plt.close()
 
     # Rendering template with the plot paths
-    return render_template('index.html', temp_plot_path='/static/temperature_plot.png', 
+    return render_template('index.html', 
+                           temp_plot_path='/static/temperature_plot.png', 
                            humidity_plot_path='/static/humidity_plot.png', 
                            weight_plot_path='/static/weight_plot.png',
                            timestamps=timestamps,
