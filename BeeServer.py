@@ -7,7 +7,6 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 
 import os
-#import psycopg2
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -69,7 +68,7 @@ def index():
     if 'end_date' in request.args:
         end_date = request.args['end_date']
 
-    timestamps_data = get_timestamps_with_values()    
+    timestamps_data = get_timestamps_with_values()
 
     # Filter data by date range if start_date and end_date are provided
     if start_date and end_date:
@@ -77,31 +76,45 @@ def index():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
-    # Extracting data
-    timestamps = [entry['timestamp'] for entry in timestamps_data]
-    temp1 = [entry['values'][0] for entry in timestamps_data]
-    temp2 = [entry['values'][1] for entry in timestamps_data]
-    temp3 = [entry['values'][3] for entry in timestamps_data]
-    temp4 = [entry['values'][5] for entry in timestamps_data]
-    humidity1 = [entry['values'][2] for entry in timestamps_data]
-    humidity2 = [entry['values'][4] for entry in timestamps_data]
-    weight = [entry['values'][6] for entry in timestamps_data]
-    
+    # Extracting data for plots
+    all_timestamps = [entry['timestamp'] for entry in timestamps_data]
+    all_temp1 = [entry['values'][0] for entry in timestamps_data]
+    all_temp2 = [entry['values'][1] for entry in timestamps_data]
+    all_temp3 = [entry['values'][3] for entry in timestamps_data]
+    all_temp4 = [entry['values'][5] for entry in timestamps_data]
+    all_humidity1 = [entry['values'][2] for entry in timestamps_data]
+    all_humidity2 = [entry['values'][4] for entry in timestamps_data]
+    all_weight = [entry['values'][6] for entry in timestamps_data]
+
+    # Define the specific times of the day to include in the filtered data for the table
+    specific_times = ['00:00:00', '06:00:00', '12:00:00', '18:00:00']
+    filtered_data = filter_data_for_times(timestamps_data, specific_times)
+
+    # Extracting data for table
+    timestamps = [entry['timestamp'] for entry in filtered_data]
+    temp1 = [entry['values'][0] for entry in filtered_data]
+    temp2 = [entry['values'][1] for entry in filtered_data]
+    temp3 = [entry['values'][3] for entry in filtered_data]
+    temp4 = [entry['values'][5] for entry in filtered_data]
+    humidity1 = [entry['values'][2] for entry in filtered_data]
+    humidity2 = [entry['values'][4] for entry in filtered_data]
+    weight = [entry['values'][6] for entry in filtered_data]
+
     # Plotting
-    maxtick = 10
+    maxtick = 6
     plt.figure(figsize=(12, 6))
 
     # Temperature plot
-    plt.plot(timestamps, temp1, color='red', label='Brood')
-    plt.plot(timestamps, temp2, color='blue', label='Super')
-    plt.plot(timestamps, temp3, color='green', label='Outside')
-    plt.plot(timestamps, temp4, color='orange', label='Roof')
+    plt.plot(all_timestamps, all_temp1, color='red', label='Brood')
+    plt.plot(all_timestamps, all_temp2, color='blue', label='Super')
+    plt.plot(all_timestamps, all_temp3, color='green', label='Outside')
+    plt.plot(all_timestamps, all_temp4, color='orange', label='Roof')
 
     plt.title('Temperature Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Temperature (°C)')
     plt.legend()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks
     plt.tight_layout()
 
     # Ensure the directory for saving the plot exists
@@ -116,13 +129,13 @@ def index():
 
     # Plotting Humidity
     plt.figure(figsize=(12, 6))
-    plt.plot(timestamps, humidity1, color='cyan', label='Outside')
-    plt.plot(timestamps, humidity2, color='magenta', label='Roof')
+    plt.plot(all_timestamps, all_humidity1, color='cyan', label='Outside')
+    plt.plot(all_timestamps, all_humidity2, color='magenta', label='Roof')
 
     plt.title('Humidity Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Humidity (%)')
-    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks 
     plt.legend()
     plt.tight_layout()
 
@@ -133,12 +146,12 @@ def index():
 
     # Plotting Weight
     plt.figure(figsize=(12, 6))
-    plt.plot(timestamps, weight, color='black', label='Weight')
+    plt.plot(all_timestamps, all_weight, color='black', label='Weight')
 
     plt.title('Weight Readings')
     plt.xlabel('Timestamp')
     plt.ylabel('Weight (kg)')
-    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks to 10
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=maxtick))  # Reduce the number of ticks
     plt.legend()
     plt.tight_layout()
 
@@ -147,21 +160,7 @@ def index():
     plt.savefig(weight_plot_path)
     plt.close()
 
-     # Define the specific times of the day to include in the filtered data
-    specific_times = ['00:00:00', '06:00:00', '12:00:00', '18:00:00']
-    filtered_data = filter_data_for_times(timestamps_data, specific_times)
-
-    # Extracting data
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    temp1 = [entry['values'][0] for entry in filtered_data]
-    temp2 = [entry['values'][1] for entry in filtered_data]
-    temp3 = [entry['values'][3] for entry in filtered_data]
-    temp4 = [entry['values'][5] for entry in filtered_data]
-    humidity1 = [entry['values'][2] for entry in filtered_data]
-    humidity2 = [entry['values'][4] for entry in filtered_data]
-    weight = [entry['values'][6] for entry in filtered_data]
-
-    # Rendering template with the plot paths
+    # Rendering template with the plot paths and table data
     return render_template('index.html', 
                            temp_plot_path='/static/temperature_plot.png', 
                            humidity_plot_path='/static/humidity_plot.png', 
