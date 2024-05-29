@@ -114,14 +114,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Function to update the table with values at tick marks
         function updateTableForGraph(graphId, timestamps, values) {
             var tableContainer = document.getElementById(graphId + '_table_container');
             tableContainer.innerHTML = ''; // Clear previous table content
             
             // Create a table
             var table = document.createElement('table');
-            
+            table.classList.add('table', 'table-striped', 'table-bordered');
+
             // Create table header
             var headerRow = document.createElement('tr');
             var headerCell = document.createElement('th');
@@ -133,9 +133,8 @@
                 headerRow.appendChild(headerCell);
             });
             table.appendChild(headerRow);
-            
+
             // Create table rows
-            // Loop through the timestamps and values to create rows and fill in the values
             timestamps.forEach(function(timestamp, index) {
                 var row = document.createElement('tr');
                 var timestampCell = document.createElement('td');
@@ -148,10 +147,10 @@
                 });
                 table.appendChild(row);
             });
-            
+
             tableContainer.appendChild(table);
         }
-        
+
         // Call the update function with appropriate data when the page loads or when graphs are updated
         // Example:
         var timestamps = {{ timestamps | tojson }};
