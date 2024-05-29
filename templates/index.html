@@ -17,7 +17,6 @@
             text-align: left;
         }
     </style>
-
 </head>
 <body>
     <div class="container">
@@ -152,30 +151,31 @@
         }
 
         // Call the update function with appropriate data when the page loads or when graphs are updated
-        // Example:
-        var timestamps = {{ timestamps | tojson }};
-        var temp1Values = {{ temp1 | tojson }};
-        var temp2Values = {{ temp2 | tojson }};
-        var temp3Values = {{ temp3 | tojson }};
-        var temp4Values = {{ temp4 | tojson }};
-        updateTableForGraph('temp', timestamps, [
-            { label: 'Brood', data: temp1Values },
-            { label: 'Super', data: temp2Values },
-            { label: 'Outside', data: temp3Values },
-            { label: 'Roof', data: temp4Values }
-        ]);
+        document.addEventListener('DOMContentLoaded', function() {
+            var timestamps = {{ timestamps | tojson }};
+            var temp1Values = {{ temp1 | tojson }};
+            var temp2Values = {{ temp2 | tojson }};
+            var temp3Values = {{ temp3 | tojson }};
+            var temp4Values = {{ temp4 | tojson }};
+            updateTableForGraph('temp', timestamps, [
+                { label: 'Brood', data: temp1Values },
+                { label: 'Super', data: temp2Values },
+                { label: 'Outside', data: temp3Values },
+                { label: 'Roof', data: temp4Values }
+            ]);
 
-        var humidity1Values = {{ humidity1 | tojson }};
-        var humidity2Values = {{ humidity2 | tojson }};
-        updateTableForGraph('humidity', timestamps, [
-            { label: 'Outside', data: humidity1Values },
-            { label: 'Roof', data: humidity2Values }
-        ]);
+            var humidity1Values = {{ humidity1 | tojson }};
+            var humidity2Values = {{ humidity2 | tojson }};
+            updateTableForGraph('humidity', timestamps, [
+                { label: 'Outside', data: humidity1Values },
+                { label: 'Roof', data: humidity2Values }
+            ]);
 
-        var weightValues = {{ weight | tojson }};
-        updateTableForGraph('weight', timestamps, [
-            { label: 'Weight', data: weightValues }
-        ]);
+            var weightValues = {{ weight | tojson }};
+            updateTableForGraph('weight', timestamps, [
+                { label: 'Weight', data: weightValues }
+            ]);
+        });
 
         function setDateRangeAndSubmit(option) {
             var today = new Date().toISOString().slice(0, 10);
@@ -183,7 +183,7 @@
             tomorrow.setDate(tomorrow.getDate() + 1);
             var endDate = tomorrow.toISOString().slice(0, 10);;
             var startDate;
-            
+
             switch(option) {
                 case 'today':
                     startDate = today;
@@ -192,21 +192,16 @@
                     startDate = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().slice(0, 10);
                     break;
                 case 'last_month':
-                    var d = new Date();
-                    d.setMonth(d.getMonth() - 1);
-                    startDate = d.toISOString().slice(0, 10);
+                    startDate = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 10);
                     break;
                 case 'last_3_months':
-                    var d = new Date();
-                    d.setMonth(d.getMonth() - 3);
-                    startDate = d.toISOString().slice(0, 10);
+                    startDate = new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10);
                     break;
                 case 'last_year':
-                    var d = new Date();
-                    d.setFullYear(d.getFullYear() - 1);
-                    startDate = d.toISOString().slice(0, 10);
+                    startDate = new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().slice(0, 10);
                     break;
                 default:
+                    startDate = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().slice(0, 10);;
                     break;
             }
 
@@ -218,15 +213,15 @@
         }
 
         function clearFilters() {
-        var today = new Date().toISOString().slice(0, 10);
-        var endDate = today;
-        var startDate = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().slice(0, 10);
-        
-        document.getElementById('start_date').value = startDate;
-        document.getElementById('end_date').value = endDate;
+            var today = new Date().toISOString().slice(0, 10);
+            var endDate = today;
+            var startDate = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().slice(0, 10);
 
-        // Submit the form programmatically
-        document.getElementById('filter_form').submit();
+            document.getElementById('start_date').value = startDate;
+            document.getElementById('end_date').value = endDate;
+
+            // Submit the form programmatically
+            document.getElementById('filter_form').submit();
         }
     </script>
 </body>
