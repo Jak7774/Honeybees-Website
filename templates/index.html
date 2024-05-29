@@ -180,7 +180,9 @@
 
         function setDateRangeAndSubmit(option) {
             var today = new Date().toISOString().slice(0, 10);
-            var endDate = today;
+            var tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var endDate = tomorrow.toISOString().slice(0, 10);;
             var startDate;
             
             switch(option) {
