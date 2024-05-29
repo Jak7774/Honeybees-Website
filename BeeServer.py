@@ -67,26 +67,15 @@ def index():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
     
-    # Randomly select 2-5 datapoints per date
-    sampled_data = []
-    for entry in timestamps_data:
-        # Shuffle the values for each date
-        values = entry['values']
-        random.shuffle(values)
-        # Select 2-5 values
-        sampled_values = values[:random.randint(2, 5)]
-        # Add the sampled data to the list
-        sampled_data.append({'timestamp': entry['timestamp'], 'values': sampled_values})
-
     # Extracting data
-    timestamps = [entry['timestamp'] for entry in sampled_data]
-    temp1 = [entry['values'][0] for entry in sampled_data]
-    temp2 = [entry['values'][1] for entry in sampled_data]
-    temp3 = [entry['values'][3] for entry in sampled_data]
-    temp4 = [entry['values'][5] for entry in sampled_data]
-    humidity1 = [entry['values'][2] for entry in sampled_data]
-    humidity2 = [entry['values'][4] for entry in sampled_data]
-    weight = [entry['values'][6] for entry in sampled_data]
+    timestamps = [entry['timestamp'] for entry in timestamps_data]
+    temp1 = [entry['values'][0] for entry in timestamps_data]
+    temp2 = [entry['values'][1] for entry in timestamps_data]
+    temp3 = [entry['values'][3] for entry in timestamps_data]
+    temp4 = [entry['values'][5] for entry in timestamps_data]
+    humidity1 = [entry['values'][2] for entry in timestamps_data]
+    humidity2 = [entry['values'][4] for entry in timestamps_data]
+    weight = [entry['values'][6] for entry in timestamps_data]
 
     # Plotting
     plt.figure(figsize=(12, 6))
