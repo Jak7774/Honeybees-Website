@@ -76,21 +76,17 @@ def index():
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
-    
-    # Define the specific times of the day to include in the filtered data
-    specific_times = ['00:00:00', '06:00:00', '12:00:00', '18:00:00']
-    filtered_data = filter_data_for_times(timestamps_data, specific_times)
 
     # Extracting data
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    temp1 = [entry['values'][0] for entry in filtered_data]
-    temp2 = [entry['values'][1] for entry in filtered_data]
-    temp3 = [entry['values'][3] for entry in filtered_data]
-    temp4 = [entry['values'][5] for entry in filtered_data]
-    humidity1 = [entry['values'][2] for entry in filtered_data]
-    humidity2 = [entry['values'][4] for entry in filtered_data]
-    weight = [entry['values'][6] for entry in filtered_data]
-
+    timestamps = [entry['timestamp'] for entry in timestamps_data]
+    temp1 = [entry['values'][0] for entry in timestamps_data]
+    temp2 = [entry['values'][1] for entry in timestamps_data]
+    temp3 = [entry['values'][3] for entry in timestamps_data]
+    temp4 = [entry['values'][5] for entry in timestamps_data]
+    humidity1 = [entry['values'][2] for entry in timestamps_data]
+    humidity2 = [entry['values'][4] for entry in timestamps_data]
+    weight = [entry['values'][6] for entry in timestamps_data]
+    
     # Plotting
     maxtick = 10
     plt.figure(figsize=(12, 6))
@@ -150,6 +146,20 @@ def index():
     weight_plot_path = os.path.join(static_dir, 'weight_plot.png')
     plt.savefig(weight_plot_path)
     plt.close()
+
+     # Define the specific times of the day to include in the filtered data
+    specific_times = ['00:00:00', '06:00:00', '12:00:00', '18:00:00']
+    filtered_data = filter_data_for_times(timestamps_data, specific_times)
+
+    # Extracting data
+    timestamps = [entry['timestamp'] for entry in filtered_data]
+    temp1 = [entry['values'][0] for entry in filtered_data]
+    temp2 = [entry['values'][1] for entry in filtered_data]
+    temp3 = [entry['values'][3] for entry in filtered_data]
+    temp4 = [entry['values'][5] for entry in filtered_data]
+    humidity1 = [entry['values'][2] for entry in filtered_data]
+    humidity2 = [entry['values'][4] for entry in filtered_data]
+    weight = [entry['values'][6] for entry in filtered_data]
 
     # Rendering template with the plot paths
     return render_template('index.html', 
