@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 import matplotlib
 matplotlib.use('Agg')
+from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 
 import os
