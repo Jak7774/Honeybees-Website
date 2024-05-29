@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import os
 #import psycopg2
 from datetime import datetime, timedelta
+import random
 
 app = Flask(__name__)
 
