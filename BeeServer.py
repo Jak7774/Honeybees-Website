@@ -7,7 +7,7 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 app = Flask(__name__)
 
