@@ -67,7 +67,21 @@ def filter_data_for_times(timestamps_data):
             filtered_data.append(entry)
     return filtered_data
 
+# Function to get the most recent sensor readings
+def get_latest_readings():
+    with app.app_context():
+        latest_timestamp = Timestamp.query.order_by(Timestamp.id.desc()).first()
+        if latest_timestamp:
+            latest_values = [value.value for value in latest_timestamp.values]
+            return {'timestamp': latest_timestamp.timestamp, 'values': latest_values}
+        return None
+
 @app.route('/')
+def landing_page():
+    latest_readings = get_latest_readings()
+    return render_template('landing_page.html', latest_readings=latest_readings)
+
+@app.route('/all_data')
 def index():
     # Set default start_date and end_date to last 7 days
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
@@ -90,12 +104,12 @@ def index():
      # Extracting data for plots with length checks
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_temp2 = [entry['values'][1] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_temp3 = [entry['values'][3] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_temp4 = [entry['values'][5] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_humidity1 = [entry['values'][2] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_humidity2 = [entry['values'][4] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_weight = [entry['values'][6] if len(entry['values']) > 0 else None for entry in timestamps_data]
+    all_temp2 = [entry['values'][1] if len(entry['values']) > 1 else None for entry in timestamps_data]
+    all_temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in timestamps_data]
+    all_temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in timestamps_data]
+    all_humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in timestamps_data]
+    all_humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in timestamps_data]
+    all_weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in timestamps_data]
 
     # Filter data for specific time ranges
     filtered_data = filter_data_for_times(timestamps_data)
@@ -103,12 +117,12 @@ def index():
     # Extracting data for table with length checks
     timestamps = [entry['timestamp'] for entry in filtered_data]
     temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in filtered_data]
-    temp2 = [entry['values'][1] if len(entry['values']) > 0 else None for entry in filtered_data]
-    temp3 = [entry['values'][3] if len(entry['values']) > 0 else None for entry in filtered_data]
-    temp4 = [entry['values'][5] if len(entry['values']) > 0 else None for entry in filtered_data]
-    humidity1 = [entry['values'][2] if len(entry['values']) > 0 else None for entry in filtered_data]
-    humidity2 = [entry['values'][4] if len(entry['values']) > 0 else None for entry in filtered_data]
-    weight = [entry['values'][6] if len(entry['values']) > 0 else None for entry in filtered_data]
+    temp2 = [entry['values'][1] if len(entry['values']) > 1 else None for entry in filtered_data]
+    temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in filtered_data]
+    temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in filtered_data]
+    humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in filtered_data]
+    humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in filtered_data]
+    weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in filtered_data]
 
     # Debug: Print the filtered data
     print("Filtered Data for Table:", filtered_data)
