@@ -79,6 +79,7 @@ def get_latest_readings():
 @app.route('/')
 def landing_page():
     latest_readings = get_latest_readings()
+    print(latest_readings)
     return render_template('landing_page.html', latest_readings=latest_readings)
 
 @app.route('/all_data')
