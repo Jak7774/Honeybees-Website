@@ -36,7 +36,7 @@
             <button type="button" class="btn btn-primary" onclick="setDateRangeAndSubmit('last_year')">Last Year</button>
         </div>
         
-        <form id="filter_form" action="/" method="GET" class="mb-3">
+        <form id="filter_form" action="/all_data" method="GET" class="mb-3">
             <div class="row align-items-end g-3">
                 <div class="col-md-auto">
                     <label for="start_date" class="col-form-label">Start Date:</label>
@@ -56,6 +56,10 @@
         <div class="mb-3">
             <button type="button" class="btn btn-secondary" onclick="clearFilters()">Reset Filters</button>
         </div>
+
+        <form action="/" method="get">
+            <button type="submit" class="btn btn-secondary mt-4">Go Back</button>
+        </form>
 
         <!-- Graph and Table -->
         <div class="row">
@@ -163,6 +167,13 @@
                 { label: 'Outside', data: temp3Values },
                 { label: 'Roof', data: temp4Values }
             ]);
+
+                    // Debug: Log data to console
+            console.log("Timestamps:", timestamps);
+            console.log("Temp1 Values:", temp1Values);
+            console.log("Temp2 Values:", temp2Values);
+            console.log("Temp3 Values:", temp3Values);
+            console.log("Temp4 Values:", temp4Values);
 
             var humidity1Values = {{ humidity1 | tojson }};
             var humidity2Values = {{ humidity2 | tojson }};
