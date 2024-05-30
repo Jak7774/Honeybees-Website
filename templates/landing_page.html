@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beehive Sensor Readings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Most Recent Sensor Readings</h1>
+        {% if latest_readings %}
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <h2>Temperature</h2>
+                    <ul class="list-group">
+                        <li class="list-group-item">Brood: {{ latest_readings.values[0] }} °C</li>
+                        <li class="list-group-item">Super: {{ latest_readings.values[1] }} °C</li>
+                        <li class="list-group-item">Roof: {{ latest_readings.values[3] }} °C</li>
+                        <li class="list-group-item">Outside: {{ latest_readings.values[5] }} °C</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h2>Humidity</h2>
+                    <ul class="list-group">
+                        <li class="list-group-item">Inside: {{ latest_readings.values[2] }} %</li>
+                        <li class="list-group-item">Outside: {{ latest_readings.values[4] }} %</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h2>Weight</h2>
+                    <ul class="list-group">
+                        <li class="list-group-item">Weight: {{ latest_readings.values[6] }} kg</li>
+                    </ul>
+                </div>
+            </div>
+        {% else %}
+            <p>No data available.</p>
+        {% endif %}
+        <a href="/all_data" class="btn btn-primary">View All Data</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
