@@ -46,7 +46,7 @@ def get_timestamps_with_values():
         data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
         
         # Debug: Print the fetched data
-        print("Fetched Data:", data)
+        #print("Fetched Data:", data)
         
         return data
 
@@ -87,31 +87,31 @@ def index():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
-    # Extracting data for plots
+     # Extracting data for plots with length checks
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_temp1 = [entry['values'][0] for entry in timestamps_data]
-    all_temp2 = [entry['values'][1] for entry in timestamps_data]
-    all_temp3 = [entry['values'][3] for entry in timestamps_data]
-    all_temp4 = [entry['values'][5] for entry in timestamps_data]
-    all_humidity1 = [entry['values'][2] for entry in timestamps_data]
-    all_humidity2 = [entry['values'][4] for entry in timestamps_data]
-    all_weight = [entry['values'][6] for entry in timestamps_data]
+    all_temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in timestamps_data]
+    all_temp2 = [entry['values'][1] if len(entry['values']) > 0 else None for entry in timestamps_data]
+    all_temp3 = [entry['values'][3] if len(entry['values']) > 0 else None for entry in timestamps_data]
+    all_temp4 = [entry['values'][5] if len(entry['values']) > 0 else None for entry in timestamps_data]
+    all_humidity1 = [entry['values'][2] if len(entry['values']) > 0 else None for entry in timestamps_data]
+    all_humidity2 = [entry['values'][4] if len(entry['values']) > 0 else None for entry in timestamps_data]
+    all_weight = [entry['values'][6] if len(entry['values']) > 0 else None for entry in timestamps_data]
 
     # Filter data for specific time ranges
     filtered_data = filter_data_for_times(timestamps_data)
-    
+
+    # Extracting data for table with length checks
+    timestamps = [entry['timestamp'] for entry in filtered_data]
+    temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in filtered_data]
+    temp2 = [entry['values'][1] if len(entry['values']) > 0 else None for entry in filtered_data]
+    temp3 = [entry['values'][3] if len(entry['values']) > 0 else None for entry in filtered_data]
+    temp4 = [entry['values'][5] if len(entry['values']) > 0 else None for entry in filtered_data]
+    humidity1 = [entry['values'][2] if len(entry['values']) > 0 else None for entry in filtered_data]
+    humidity2 = [entry['values'][4] if len(entry['values']) > 0 else None for entry in filtered_data]
+    weight = [entry['values'][6] if len(entry['values']) > 0 else None for entry in filtered_data]
+
     # Debug: Print the filtered data
     print("Filtered Data for Table:", filtered_data)
-
-    # Extracting data for table
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    temp1 = [entry['values'][0] for entry in filtered_data]
-    temp2 = [entry['values'][1] for entry in filtered_data]
-    temp3 = [entry['values'][3] for entry in filtered_data]
-    temp4 = [entry['values'][5] for entry in filtered_data]
-    humidity1 = [entry['values'][2] for entry in filtered_data]
-    humidity2 = [entry['values'][4] for entry in filtered_data]
-    weight = [entry['values'][6] for entry in filtered_data]
 
     # Plotting
     maxtick = 6
