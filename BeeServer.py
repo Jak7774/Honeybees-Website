@@ -44,22 +44,33 @@ def get_timestamps_with_values():
             data.append({'timestamp': timestamp.timestamp, 'values': values})
         # Sort the data by timestamps
         data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
+        
+        # Debug: Print the fetched data
+        print("Fetched Data:", data)
+        
         return data
 
-# Function to filter data points for specific times of the day
-def filter_data_for_times(timestamps_data, times):
+# Function to filter data points for specific time ranges of the day
+def filter_data_for_times(timestamps_data):
     filtered_data = []
+    time_ranges = [
+        (time(0, 0), time(0, 30)),
+        (time(6, 0), time(6, 30)),
+        (time(12, 0), time(12, 30)),
+        (time(18, 0), time(18, 30))
+    ]
     for entry in timestamps_data:
         timestamp_str = entry['timestamp']
         timestamp = datetime.strptime(timestamp_str, '%d/%m/%YT%H:%M:%S')
-        if timestamp.strftime('%H:%M:%S') in times:
+        entry_time = timestamp.time()
+        if any(start <= entry_time <= end for start, end in time_ranges):
             filtered_data.append(entry)
     return filtered_data
 
 @app.route('/')
 def index():
     # Set default start_date and end_date to last 7 days
-    end_date = datetime.now().strftime('%Y-%m-%d')
+    end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
 
     # Override defaults if provided in the request arguments
@@ -86,9 +97,11 @@ def index():
     all_humidity2 = [entry['values'][4] for entry in timestamps_data]
     all_weight = [entry['values'][6] for entry in timestamps_data]
 
-    # Define the specific times of the day to include in the filtered data for the table
-    specific_times = ['00:00:00', '06:00:00', '12:00:00', '18:00:00']
-    filtered_data = filter_data_for_times(timestamps_data, specific_times)
+    # Filter data for specific time ranges
+    filtered_data = filter_data_for_times(timestamps_data)
+    
+    # Debug: Print the filtered data
+    print("Filtered Data for Table:", filtered_data)
 
     # Extracting data for table
     timestamps = [entry['timestamp'] for entry in filtered_data]
