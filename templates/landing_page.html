@@ -14,23 +14,23 @@
                 <div class="col-md-4">
                     <h2>Temperature</h2>
                     <ul class="list-group">
-                        <li class="list-group-item">Brood: {{ latest_readings.values[0] }} °C</li>
-                        <li class="list-group-item">Super: {{ latest_readings.values[1] }} °C</li>
-                        <li class="list-group-item">Roof: {{ latest_readings.values[3] }} °C</li>
-                        <li class="list-group-item">Outside: {{ latest_readings.values[5] }} °C</li>
+                        <li class="list-group-item">Brood: {{ latest_readings['values'][0] }} °C</li>
+                        <li class="list-group-item">Super: {{ latest_readings['values'][1] }} °C</li>
+                        <li class="list-group-item">Roof: {{ latest_readings['values'][5] }} °C</li>
+                        <li class="list-group-item">Outside: {{ latest_readings['values'][3] }} °C</li>
                     </ul>
                 </div>
                 <div class="col-md-4">
                     <h2>Humidity</h2>
                     <ul class="list-group">
-                        <li class="list-group-item">Inside: {{ latest_readings.values[2] }} %</li>
-                        <li class="list-group-item">Outside: {{ latest_readings.values[4] }} %</li>
+                        <li class="list-group-item">Inside: {{ latest_readings['values'][4] }} %</li>
+                        <li class="list-group-item">Outside: {{ latest_readings['values'][2] }} %</li>
                     </ul>
                 </div>
                 <div class="col-md-4">
                     <h2>Weight</h2>
                     <ul class="list-group">
-                        <li class="list-group-item">Weight: {{ latest_readings.values[6] }} kg</li>
+                        <li class="list-group-item">Weight: {{ latest_readings['values'][6] }} kg</li>
                     </ul>
                 </div>
             </div>
