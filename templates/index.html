@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Data</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .container-with-padding table td {
+            padding-right: 20px; /* Adjust padding as needed */
+            border-right: 10px solid transparent;
+        }
+        .container-with-padding table th {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Beehive Data</h1>
+
+        <!-- Filter Results header -->
+        <div class="mb-3">
+            <h2>Filter Results</h2>
+        </div>
+        
+        <!-- Quick options -->
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary" onclick="setDateRangeAndSubmit('today')">Today</button>
+            <button type="button" class="btn btn-primary" onclick="setDateRangeAndSubmit('last_7_days')">Last 7 Days</button>
+            <button type="button" class="btn btn-primary" onclick="setDateRangeAndSubmit('last_month')">Last Month</button>
+            <button type="button" class="btn btn-primary" onclick="setDateRangeAndSubmit('last_3_months')">Last 3 Months</button>
+            <button type="button" class="btn btn-primary" onclick="setDateRangeAndSubmit('last_year')">Last Year</button>
+        </div>
+        
+        <form id="filter_form" action="/all_data" method="GET" class="mb-3">
+            <div class="row align-items-end g-3">
+                <div class="col-md-auto">
+                    <label for="start_date" class="col-form-label">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control">
+                </div>
+                <div class="col-md-auto">
+                    <label for="end_date" class="col-form-label">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control">
+                </div>
+                <div class="col-md-auto align-self-end">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Clear filters and reset to default -->
+        <div class="mb-3">
+            <button type="button" class="btn btn-secondary" onclick="clearFilters()">Reset Filters</button>
+        </div>
+
+        <form action="/" method="get">
+            <button type="submit" class="btn btn-secondary mt-4">Go Back</button>
+        </form>
+
+        <!-- Graph and Table -->
+        <div class="row">
+            <div class="col-md-9">
+                {% if temp_plot_path %}
+                    <h2>Temperature Readings</h2>
+                    <img src="{{ temp_plot_path }}" alt="Temperature Plot" class="img-fluid mb-3">
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                {% if temp_plot_path %}
+                    <div id="temp_table_container" class="container-with-padding">
+                        <!-- Temperature table will be dynamically updated here -->
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Graph and Table (next set) -->
+        <div class="row">
+            <div class="col-md-9">
+                {% if humidity_plot_path %}
+                    <h2>Humidity Readings</h2>
+                    <img src="{{ humidity_plot_path }}" alt="Humidity Plot" class="img-fluid mb-3">
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                {% if humidity_plot_path %}
+                    <div id="humidity_table_container" class="container-with-padding">
+                        <!-- Humidity table will be dynamically updated here -->
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Graph and Table (next set) -->
+        <div class="row">
+            <div class="col-md-9">
+                {% if weight_plot_path %}
+                    <h2>Weight Readings</h2>
+                    <img src="{{ weight_plot_path }}" alt="Weight Plot" class="img-fluid mb-3">
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                {% if weight_plot_path %}
+                    <div id="weight_table_container" class="container-with-padding">
+                        <!-- Weight table will be dynamically updated here -->
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (optional, if needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function updateTableForGraph(graphId, timestamps, values) {
+            var tableContainer = document.getElementById(graphId + '_table_container');
+            tableContainer.innerHTML = ''; // Clear previous table content
+            
+            // Create a table
+            var table = document.createElement('table');
+            table.classList.add('table', 'table-striped', 'table-bordered');
+
+            // Create table header
+            var headerRow = document.createElement('tr');
+            var headerCell = document.createElement('th');
+            headerCell.textContent = 'Timestamp';
+            headerRow.appendChild(headerCell);
+            values.forEach(function(value) {
+                headerCell = document.createElement('th');
+                headerCell.textContent = value.label;
+                headerRow.appendChild(headerCell);
+            });
+            table.appendChild(headerRow);
+
+            // Create table rows
+            timestamps.forEach(function(timestamp, index) {
+                var row = document.createElement('tr');
+                var timestampCell = document.createElement('td');
+                timestampCell.textContent = timestamp;
+                row.appendChild(timestampCell);
+                values.forEach(function(value) {
+                    var valueCell = document.createElement('td');
+                    valueCell.textContent = value.data[index];
+                    row.appendChild(valueCell);
+                });
+                table.appendChild(row);
+            });
+
+            tableContainer.appendChild(table);
+        }
+
+        // Call the update function with appropriate data when the page loads or when graphs are updated
+        document.addEventListener('DOMContentLoaded', function() {
+            var timestamps = {{ timestamps | tojson }};
+            var temp1Values = {{ temp1 | tojson }};
+            var temp2Values = {{ temp2 | tojson }};
+            var temp3Values = {{ temp3 | tojson }};
+            var temp4Values = {{ temp4 | tojson }};
+            updateTableForGraph('temp', timestamps, [
+                { label: 'Brood', data: temp1Values },
+                { label: 'Super', data: temp2Values },
+                { label: 'Outside', data: temp3Values },
+                { label: 'Roof', data: temp4Values }
+            ]);
+
+                    // Debug: Log data to console
+            console.log("Timestamps:", timestamps);
+            console.log("Temp1 Values:", temp1Values);
+            console.log("Temp2 Values:", temp2Values);
+            console.log("Temp3 Values:", temp3Values);
+            console.log("Temp4 Values:", temp4Values);
+
+            var humidity1Values = {{ humidity1 | tojson }};
+            var humidity2Values = {{ humidity2 | tojson }};
+            updateTableForGraph('humidity', timestamps, [
+                { label: 'Outside', data: humidity1Values },
+                { label: 'Roof', data: humidity2Values }
+            ]);
+
+            var weightValues = {{ weight | tojson }};
+            updateTableForGraph('weight', timestamps, [
+                { label: 'Weight', data: weightValues }
+            ]);
+        });
+
+        function setDateRangeAndSubmit(option) {
+            var today = new Date().toISOString().slice(0, 10);
+            var tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var endDate = tomorrow.toISOString().slice(0, 10);;
+            var startDate;
+
+            switch(option) {
+                case 'today':
+                    startDate = today;
+                    break;
+                case 'last_7_days':
+                    startDate = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().slice(0, 10);
+                    break;
+                case 'last_month':
+                    startDate = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 10);
+                    break;
+                case 'last_3_months':
+                    startDate = new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10);
+                    break;
+                case 'last_year':
+                    startDate = new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().slice(0, 10);
+                    break;
+                default:
+                    startDate = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().slice(0, 10);;
+                    break;
+            }
+
+            document.getElementById('start_date').value = startDate;
+            document.getElementById('end_date').value = endDate;
+
+            // Submit the form programmatically
+            document.getElementById('filter_form').submit();
+        }
+
+        function clearFilters() {
+            var today = new Date().toISOString().slice(0, 10);
+            var endDate = today;
+            var startDate = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().slice(0, 10);
+
+            document.getElementById('start_date').value = startDate;
+            document.getElementById('end_date').value = endDate;
+
+            // Submit the form programmatically
+            document.getElementById('filter_form').submit();
+        }
+    </script>
+</body>
+</html>
