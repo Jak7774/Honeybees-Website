@@ -13,7 +13,7 @@
             <div class="row mb-4">
                 <div class="col-md-4">
                     <h2>
-                        <img src="temperature.png" alt="Temperature Icon" style="width:48px;height:48px;">
+                        <img src="{{ url_for('static', filename='temperature.png') }}" alt="Temperature Icon" style="width:48px;height:48px;">
                         Temperature
                     </h2>
                     <ul class="list-group">
@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-4">
                     <h2>
-                        <img src="humidity.png" alt="Humidity Icon" style="width:48px;height:48px;">
+                        <img src="{{ url_for('static', filename='humidity.png') }}" alt="Humidity Icon" style="width:48px;height:48px;">
                         Humidity
                     </h2>
                     <ul class="list-group">
@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-md-4">
                     <h2>
-                        <img src="weight.png" alt="Weight Icon" style="width:48px;height:48px;">
+                        <img src="{{ url_for('static', filename='weight.png') }}" alt="Weight Icon" style="width:48px;height:48px;">
                         Weight
                     </h2>
                     <ul class="list-group">
