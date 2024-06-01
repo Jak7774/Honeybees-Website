@@ -108,8 +108,8 @@ def get_summary_statistics(timestamps_data):
         'Night': (time(0, 0), time(6, 0))
     }
 
-    temp_data = [{'timestamp': entry['timestamp'], 'values': entry['values'][:4]} for entry in timestamps_data if entry['values'][:4]]
-    humidity_data = [{'timestamp': entry['timestamp'], 'values': entry['values'][2:4]} for entry in timestamps_data if entry['values'][2:4]]
+    temp_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in [0, 1, 3, 5]]} for entry in timestamps_data if len(entry['values']) > 5]
+    humidity_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in [2, 4]]} for entry in timestamps_data if len(entry['values']) > 4]
     weight_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][6]]} for entry in timestamps_data if len(entry['values']) > 6]
 
     temp_summary = calculate_summary(temp_data, time_ranges)
