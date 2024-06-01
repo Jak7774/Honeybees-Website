@@ -226,13 +226,6 @@ def temperature_page():
     all_temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in timestamps_data]
     all_temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in timestamps_data]
 
-    filtered_data = filter_data_for_times(timestamps_data)
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in filtered_data]
-    temp2 = [entry['values'][1] if len(entry['values']) > 1 else None for entry in filtered_data]
-    temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in filtered_data]
-    temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in filtered_data]
-
     maxtick = 6
     plt.figure(figsize=(12, 6))
     plt.plot(all_timestamps, all_temp1, color='red', label='Brood')
@@ -255,11 +248,11 @@ def temperature_page():
 
     return render_template('temperature.html',
                            temp_plot_path='/static/temperature_plot.png',
-                           timestamps=timestamps,
-                           temp1=temp1,
-                           temp2=temp2,
-                           temp3=temp3,
-                           temp4=temp4)
+                           timestamps=all_timestamps,
+                           temp1=all_temp1,
+                           temp2=all_temp2,
+                           temp3=all_temp3,
+                           temp4=all_temp4)
 
 @app.route('/humidity')
 def humidity_page():
@@ -282,11 +275,6 @@ def humidity_page():
     all_humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in timestamps_data]
     all_humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in timestamps_data]
 
-    filtered_data = filter_data_for_times(timestamps_data)
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in filtered_data]
-    humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in filtered_data]
-
     maxtick = 6
     plt.figure(figsize=(12, 6))
     plt.plot(all_timestamps, all_humidity1, color='cyan', label='Outside')
@@ -307,9 +295,9 @@ def humidity_page():
 
     return render_template('humidity.html',
                            humidity_plot_path='/static/humidity_plot.png',
-                           timestamps=timestamps,
-                           humidity1=humidity1,
-                           humidity2=humidity2)
+                           timestamps=all_timestamps,
+                           humidity1=all_humidity1,
+                           humidity2=all_humidity2)
 
 @app.route('/weight')
 def weight_page():
@@ -331,10 +319,6 @@ def weight_page():
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in timestamps_data]
 
-    filtered_data = filter_data_for_times(timestamps_data)
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in filtered_data]
-
     maxtick = 6
     plt.figure(figsize=(12, 6))
     plt.plot(all_timestamps, all_weight, color='brown', label='Weight')
@@ -354,8 +338,8 @@ def weight_page():
 
     return render_template('weight.html',
                            weight_plot_path='/static/weight_plot.png',
-                           timestamps=timestamps,
-                           weight=weight)
+                           timestamps=all_timestamps,
+                           weight=all_weight)
 
 @app.route('/export_temperature', methods=['GET'])
 def export_temperature():
@@ -369,17 +353,16 @@ def export_temperature():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
-    filtered_data = filter_data_for_times(timestamps_data)
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    temp1 = [entry['values'][0] for entry in filtered_data]
-    temp2 = [entry['values'][1] for entry in filtered_data]
-    temp3 = [entry['values'][2] for entry in filtered_data]
-    temp4 = [entry['values'][3] for entry in filtered_data]
+    all_timestamps = [entry['timestamp'] for entry in timestamps_data]
+    all_temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in timestamps_data]
+    all_temp2 = [entry['values'][1] if len(entry['values']) > 1 else None for entry in timestamps_data]
+    all_temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in timestamps_data]
+    all_temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in timestamps_data]
 
     # Create a CSV string
     csv_data = 'Timestamp,Brood Temp,Super Temp,Outside Temp,Roof Temp\n'
-    for i in range(len(timestamps)):
-        csv_data += f'{timestamps[i]},{temp1[i]},{temp2[i]},{temp3[i]},{temp4[i]}\n'
+    for i in range(len(all_timestamps)):
+        csv_data += f'{all_timestamps[i]},{all_temp1[i]},{all_temp2[i]},{all_temp3[i]},{all_temp4[i]}\n'
 
     # Create a response with the CSV string
     response = make_response(csv_data)
@@ -399,15 +382,14 @@ def export_humidity():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
-    filtered_data = filter_data_for_times(timestamps_data)
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    humidity1 = [entry['values'][4] for entry in filtered_data]
-    humidity2 = [entry['values'][5] for entry in filtered_data]
+    all_timestamps = [entry['timestamp'] for entry in timestamps_data]
+    all_humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in timestamps_data]
+    all_humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in timestamps_data]
 
     # Create a CSV string
     csv_data = 'Timestamp,Outside Humidity,Roof Humidity\n'
-    for i in range(len(timestamps)):
-        csv_data += f'{timestamps[i]},{humidity1[i]},{humidity2[i]}\n'
+    for i in range(len(all_timestamps)):
+        csv_data += f'{all_timestamps[i]},{all_humidity1[i]},{all_humidity2[i]}\n'
 
     # Create a response with the CSV string
     response = make_response(csv_data)
@@ -427,14 +409,13 @@ def export_weight():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
-    filtered_data = filter_data_for_times(timestamps_data)
-    timestamps = [entry['timestamp'] for entry in filtered_data]
-    weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in filtered_data]
+    all_timestamps = [entry['timestamp'] for entry in timestamps_data]
+    all_weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in timestamps_data]
 
     # Create a CSV string
     csv_data = 'Timestamp,Weight\n'
-    for i in range(len(timestamps)):
-        csv_data += f'{timestamps[i]},{weight[i]}\n'
+    for i in range(len(all_timestamps)):
+        csv_data += f'{all_timestamps[i]},{all_weight[i]}\n'
 
     # Create a response with the CSV string
     response = make_response(csv_data)
