@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 import os
 from datetime import datetime, timedelta, time
+from statistics import mean
 
 app = Flask(__name__)
 
@@ -76,6 +77,47 @@ def get_latest_readings():
             return {'timestamp': latest_timestamp.timestamp, 'values': latest_values}
         return None
 
+# Function to calculate summary statistics for a given set of data
+def calculate_summary(data, time_ranges):
+    summary = {period: {'mean': None, 'min': None, 'max': None, 'count': 0} for period in time_ranges.keys()}
+    for entry in data:
+        timestamp_str = entry['timestamp']
+        timestamp = datetime.strptime(timestamp_str, '%d/%m/%YT%H:%M:%S')
+        entry_time = timestamp.time()
+        for period, (start, end) in time_ranges.items():
+            if start <= entry_time < end:
+                values = entry['values']
+                if values:
+                    if summary[period]['count'] == 0:
+                        summary[period]['mean'] = mean(values)
+                        summary[period]['min'] = min(values)
+                        summary[period]['max'] = max(values)
+                    else:
+                        summary[period]['mean'] = (summary[period]['mean'] * summary[period]['count'] + sum(values)) / (summary[period]['count'] + len(values))
+                        summary[period]['min'] = min(summary[period]['min'], min(values))
+                        summary[period]['max'] = max(summary[period]['max'], max(values))
+                    summary[period]['count'] += len(values)
+    return summary
+
+# Function to get the summary statistics for each category (temperature, humidity, weight)
+def get_summary_statistics(timestamps_data):
+    time_ranges = {
+        'Morning': (time(6, 0), time(12, 0)),
+        'Afternoon': (time(12, 0), time(18, 0)),
+        'Evening': (time(18, 0), time(0, 0)),
+        'Night': (time(0, 0), time(6, 0))
+    }
+
+    temp_data = [{'timestamp': entry['timestamp'], 'values': entry['values'][:4]} for entry in timestamps_data if entry['values'][:4]]
+    humidity_data = [{'timestamp': entry['timestamp'], 'values': entry['values'][2:4]} for entry in timestamps_data if entry['values'][2:4]]
+    weight_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][6]]} for entry in timestamps_data if len(entry['values']) > 6]
+
+    temp_summary = calculate_summary(temp_data, time_ranges)
+    humidity_summary = calculate_summary(humidity_data, time_ranges)
+    weight_summary = calculate_summary(weight_data, time_ranges)
+
+    return temp_summary, humidity_summary, weight_summary
+
 @app.route('/')
 def landing_page():
     latest_readings = get_latest_readings()
@@ -127,6 +169,9 @@ def index():
 
     # Debug: Print the filtered data
     print("Filtered Data for Table:", filtered_data)
+
+    # Get summary statistics
+    temp_summary, humidity_summary, weight_summary = get_summary_statistics(timestamps_data)
 
     # Plotting
     maxtick = 6
@@ -200,7 +245,10 @@ def index():
                            temp4=temp4,
                            humidity1=humidity1,
                            humidity2=humidity2,
-                           weight=weight)
+                           weight=weight,
+                           temp_summary=temp_summary,
+                           humidity_summary=humidity_summary,
+                           weight_summary=weight_summary)
 
 @app.route('/temperature')
 def temperature_page():
