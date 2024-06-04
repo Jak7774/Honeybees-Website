@@ -35,6 +35,13 @@ class Value(db.Model):
     timestamp_id = db.Column(db.Integer, db.ForeignKey('timestamp.id'), nullable=False)
     value = db.Column(db.Float)
 
+# Define sensor positions
+sensor_positions = {
+    'temperature': [0, 1, 3, 5],
+    'humidity': [2, 4],
+    'weight': [6]
+}
+
 # Function to retrieve all timestamps with their corresponding values
 def get_timestamps_with_values():
     with app.app_context():
@@ -104,13 +111,13 @@ def get_summary_statistics(timestamps_data):
     time_ranges = {
         'Morning': (time(6, 0), time(12, 0)),
         'Afternoon': (time(12, 0), time(18, 0)),
-        'Evening': (time(18, 0), time(0, 0)),
+        'Evening': (time(18, 0), time(23, 59)),
         'Night': (time(0, 0), time(6, 0))
     }
 
-    temp_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in [0, 1, 3, 5]]} for entry in timestamps_data if len(entry['values']) > 5]
-    humidity_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in [2, 4]]} for entry in timestamps_data if len(entry['values']) > 4]
-    weight_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][6]]} for entry in timestamps_data if len(entry['values']) > 6]
+    temp_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['temperature']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['temperature'])]
+    humidity_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['humidity']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['humidity'])]
+    weight_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['weight']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['weight'])]
 
     temp_summary = calculate_summary(temp_data, time_ranges)
     humidity_summary = calculate_summary(humidity_data, time_ranges)
@@ -144,33 +151,33 @@ def index():
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
-     # Extracting data for plots with length checks
+    # Extracting data for plots with length checks
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_temp2 = [entry['values'][1] if len(entry['values']) > 1 else None for entry in timestamps_data]
-    all_temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in timestamps_data]
-    all_temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in timestamps_data]
-    all_humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in timestamps_data]
-    all_humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in timestamps_data]
-    all_weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in timestamps_data]
+    all_temp1 = [entry['values'][sensor_positions['temperature'][0]] if len(entry['values']) > sensor_positions['temperature'][0] else None for entry in timestamps_data]
+    all_temp2 = [entry['values'][sensor_positions['temperature'][1]] if len(entry['values']) > sensor_positions['temperature'][1] else None for entry in timestamps_data]
+    all_temp3 = [entry['values'][sensor_positions['temperature'][2]] if len(entry['values']) > sensor_positions['temperature'][2] else None for entry in timestamps_data]
+    all_temp4 = [entry['values'][sensor_positions['temperature'][3]] if len(entry['values']) > sensor_positions['temperature'][3] else None for entry in timestamps_data]
+    all_humidity1 = [entry['values'][sensor_positions['humidity'][0]] if len(entry['values']) > sensor_positions['humidity'][0] else None for entry in timestamps_data]
+    all_humidity2 = [entry['values'][sensor_positions['humidity'][1]] if len(entry['values']) > sensor_positions['humidity'][1] else None for entry in timestamps_data]
+    all_weight = [entry['values'][sensor_positions['weight'][0]] if len(entry['values']) > sensor_positions['weight'][0] else None for entry in timestamps_data]
 
     # Filter data for specific time ranges
     filtered_data = filter_data_for_times(timestamps_data)
 
     # Extracting data for table with length checks
     timestamps = [entry['timestamp'] for entry in filtered_data]
-    temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in filtered_data]
-    temp2 = [entry['values'][1] if len(entry['values']) > 1 else None for entry in filtered_data]
-    temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in filtered_data]
-    temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in filtered_data]
-    humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in filtered_data]
-    humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in filtered_data]
-    weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in filtered_data]
-
+    temp1 = [entry['values'][sensor_positions['temperature'][0]] if len(entry['values']) > sensor_positions['temperature'][0] else None for entry in filtered_data]
+    temp2 = [entry['values'][sensor_positions['temperature'][1]] if len(entry['values']) > sensor_positions['temperature'][1] else None for entry in filtered_data]
+    temp3 = [entry['values'][sensor_positions['temperature'][2]] if len(entry['values']) > sensor_positions['temperature'][2] else None for entry in filtered_data]
+    temp4 = [entry['values'][sensor_positions['temperature'][3]] if len(entry['values']) > sensor_positions['temperature'][3] else None for entry in filtered_data]
+    humidity1 = [entry['values'][sensor_positions['humidity'][0]] if len(entry['values']) > sensor_positions['humidity'][0] else None for entry in filtered_data]
+    humidity2 = [entry['values'][sensor_positions['humidity'][1]] if len(entry['values']) > sensor_positions['humidity'][1] else None for entry in filtered_data]
+    weight = [entry['values'][sensor_positions['weight'][0]] if len(entry['values']) > sensor_positions['weight'][0] else None for entry in filtered_data]
+    
     # Debug: Print the filtered data
-    print("Filtered Data for Table:", filtered_data)
+    #print("Filtered Data for Table:", filtered_data)
 
-    # Get summary statistics
+    # Calculate summary statistics
     temp_summary, humidity_summary, weight_summary = get_summary_statistics(timestamps_data)
 
     # Plotting
@@ -269,10 +276,10 @@ def temperature_page():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_temp2 = [entry['values'][1] if len(entry['values']) > 1 else None for entry in timestamps_data]
-    all_temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in timestamps_data]
-    all_temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in timestamps_data]
+    all_temp1 = [entry['values'][sensor_positions['temperature'][0]] if len(entry['values']) > sensor_positions['temperature'][0] else None for entry in timestamps_data]
+    all_temp2 = [entry['values'][sensor_positions['temperature'][1]] if len(entry['values']) > sensor_positions['temperature'][1] else None for entry in timestamps_data]
+    all_temp3 = [entry['values'][sensor_positions['temperature'][2]] if len(entry['values']) > sensor_positions['temperature'][2] else None for entry in timestamps_data]
+    all_temp4 = [entry['values'][sensor_positions['temperature'][3]] if len(entry['values']) > sensor_positions['temperature'][3] else None for entry in timestamps_data]
 
     maxtick = 6
     plt.figure(figsize=(12, 6))
@@ -320,8 +327,8 @@ def humidity_page():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in timestamps_data]
-    all_humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in timestamps_data]
+    all_humidity1 = [entry['values'][sensor_positions['humidity'][0]] if len(entry['values']) > sensor_positions['humidity'][0] else None for entry in timestamps_data]
+    all_humidity2 = [entry['values'][sensor_positions['humidity'][1]] if len(entry['values']) > sensor_positions['humidity'][1] else None for entry in timestamps_data]
 
     maxtick = 6
     plt.figure(figsize=(12, 6))
@@ -365,7 +372,7 @@ def weight_page():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in timestamps_data]
+    all_weight = [entry['values'][sensor_positions['weight'][0]] if len(entry['values']) > sensor_positions['weight'][0] else None for entry in timestamps_data]
 
     maxtick = 6
     plt.figure(figsize=(12, 6))
@@ -402,10 +409,10 @@ def export_temperature():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_temp1 = [entry['values'][0] if len(entry['values']) > 0 else None for entry in timestamps_data]
-    all_temp2 = [entry['values'][1] if len(entry['values']) > 1 else None for entry in timestamps_data]
-    all_temp3 = [entry['values'][3] if len(entry['values']) > 3 else None for entry in timestamps_data]
-    all_temp4 = [entry['values'][5] if len(entry['values']) > 5 else None for entry in timestamps_data]
+    all_temp1 = [entry['values'][sensor_positions['temperature'][0]] if len(entry['values']) > sensor_positions['temperature'][0] else None for entry in timestamps_data]
+    all_temp2 = [entry['values'][sensor_positions['temperature'][1]] if len(entry['values']) > sensor_positions['temperature'][1] else None for entry in timestamps_data]
+    all_temp3 = [entry['values'][sensor_positions['temperature'][2]] if len(entry['values']) > sensor_positions['temperature'][2] else None for entry in timestamps_data]
+    all_temp4 = [entry['values'][sensor_positions['temperature'][3]] if len(entry['values']) > sensor_positions['temperature'][3] else None for entry in timestamps_data]
 
     # Create a CSV string
     csv_data = 'Timestamp,Brood Temp,Super Temp,Outside Temp,Roof Temp\n'
@@ -431,9 +438,9 @@ def export_humidity():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_humidity1 = [entry['values'][2] if len(entry['values']) > 2 else None for entry in timestamps_data]
-    all_humidity2 = [entry['values'][4] if len(entry['values']) > 4 else None for entry in timestamps_data]
-
+    all_humidity1 = [entry['values'][sensor_positions['humidity'][0]] if len(entry['values']) > sensor_positions['humidity'][0] else None for entry in timestamps_data]
+    all_humidity2 = [entry['values'][sensor_positions['humidity'][1]] if len(entry['values']) > sensor_positions['humidity'][1] else None for entry in timestamps_data]
+    
     # Create a CSV string
     csv_data = 'Timestamp,Outside Humidity,Roof Humidity\n'
     for i in range(len(all_timestamps)):
@@ -458,7 +465,7 @@ def export_weight():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_weight = [entry['values'][6] if len(entry['values']) > 6 else None for entry in timestamps_data]
+    all_weight = [entry['values'][sensor_positions['weight'][0]] if len(entry['values']) > sensor_positions['weight'][0] else None for entry in timestamps_data]
 
     # Create a CSV string
     csv_data = 'Timestamp,Weight\n'

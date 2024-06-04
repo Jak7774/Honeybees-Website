@@ -3,7 +3,10 @@
 {% block title %}Temperature Readings{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Temperature Readings</h1>
+<h1 class="mb-4">
+    <img src="{{ url_for('static', filename='temperature.png') }}" alt="Temperature Icon" style="width:48px;height:48px;">
+    Temperature Readings
+</h1>
 
 <!-- Filter Form -->
 <form id="filter_form" action="/temperature" method="GET" class="mb-3">
