@@ -3,7 +3,10 @@
 {% block title %}Humidity Readings{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Humidity Readings</h1>
+<h1 class="mb-4">
+    <img src="{{ url_for('static', filename='humidity.png') }}" alt="Humidity Icon" style="width:48px;height:48px;">
+    Humidity Readings
+</h1>
 
 <!-- Filter Form -->
 <form id="filter_form" action="/humidity" method="GET" class="mb-3">

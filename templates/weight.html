@@ -3,7 +3,10 @@
 {% block title %}Weight Readings{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Weight Readings</h1>
+<h1 class="mb-4">
+    <img src="{{ url_for('static', filename='weight.png') }}" alt="Weight Icon" style="width:48px;height:48px;">
+    Weight Readings
+</h1>
 
 <!-- Filter Form -->
 <form id="filter_form" action="/weight" method="GET" class="mb-3">
