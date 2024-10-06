@@ -55,16 +55,9 @@
                 <img src="{{ url_for('static', filename='temperature.png') }}" alt="Temperature Icon" style="width:48px;height:48px;">
                 Temperature Readings
             </h2>
-            <div class="col-md-9">
+            <div class="col-md-12">
                 {% if temp_plot_path %}
                     <img src="{{ temp_plot_path }}" alt="Temperature Plot" class="img-fluid mb-3">
-                {% endif %}
-            </div>
-            <div class="col-md-3">
-                {% if temp_plot_path %}
-                    <div id="temp_table_container" class="container-with-padding">
-                        <!-- Temperature table will be dynamically updated here -->
-                    </div>
                 {% endif %}
             </div>
         </div>
@@ -103,16 +96,9 @@
                 <img src="{{ url_for('static', filename='humidity.png') }}" alt="Humidity Icon" style="width:48px;height:48px;">
                 Humidity Readings
             </h2>
-            <div class="col-md-9">
+            <div class="col-md-12">
                 {% if humidity_plot_path %}
                     <img src="{{ humidity_plot_path }}" alt="Humidity Plot" class="img-fluid mb-3">
-                {% endif %}
-            </div>
-            <div class="col-md-3">
-                {% if humidity_plot_path %}
-                    <div id="humidity_table_container" class="container-with-padding">
-                        <!-- Humidity table will be dynamically updated here -->
-                    </div>
                 {% endif %}
             </div>
         </div>
@@ -151,16 +137,9 @@
                 <img src="{{ url_for('static', filename='weight.png') }}" alt="Weight Icon" style="width:48px;height:48px;">
                 Weight Readings
             </h2>
-            <div class="col-md-9">
+            <div class="col-md-12">
                 {% if weight_plot_path %}
                     <img src="{{ weight_plot_path }}" alt="Weight Plot" class="img-fluid mb-3">
-                {% endif %}
-            </div>
-            <div class="col-md-3">
-                {% if weight_plot_path %}
-                    <div id="weight_table_container" class="container-with-padding">
-                        <!-- Weight table will be dynamically updated here -->
-                    </div>
                 {% endif %}
             </div>
         </div>
