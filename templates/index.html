@@ -79,7 +79,7 @@
                     {% for period, stats in temp_summary.items() %}
                         <tr>
                             <td>{{ period }}</td>
-                            <td>{{ stats.mean if stats.mean is not none else 'N/A' }}</td>
+                            <td>{{ "%.2f"|format(stats.mean) if stats.mean is not none else 'N/A' }}</td>
                             <td>{{ stats.min if stats.min is not none else 'N/A' }}</td>
                             <td>{{ stats.max if stats.max is not none else 'N/A' }}</td>
                             <td>{{ stats.count }}</td>
@@ -120,7 +120,7 @@
                     {% for period, stats in humidity_summary.items() %}
                         <tr>
                             <td>{{ period }}</td>
-                            <td>{{ stats.mean if stats.mean is not none else 'N/A' }}</td>
+                            <td>{{ "%.2f"|format(stats.mean) if stats.mean is not none else 'N/A' }}</td>
                             <td>{{ stats.min if stats.min is not none else 'N/A' }}</td>
                             <td>{{ stats.max if stats.max is not none else 'N/A' }}</td>
                             <td>{{ stats.count }}</td>
@@ -161,7 +161,7 @@
                     {% for period, stats in weight_summary.items() %}
                         <tr>
                             <td>{{ period }}</td>
-                            <td>{{ stats.mean if stats.mean is not none else 'N/A' }}</td>
+                            <td>{{ "%.2f"|format(stats.mean) if stats.mean is not none else 'N/A' }}</td>
                             <td>{{ stats.min if stats.min is not none else 'N/A' }}</td>
                             <td>{{ stats.max if stats.max is not none else 'N/A' }}</td>
                             <td>{{ stats.count }}</td>
