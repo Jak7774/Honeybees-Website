@@ -1,11 +1,10 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 
-from flask import Flask, render_template, redirect, url_for, request, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
-from flask_bcrypt import Bcrypt
-from flask_migrate import Migrate
+#from flask import Flask, redirect, url_for, flash
+#from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+#from flask_bcrypt import Bcrypt
+#from flask_migrate import Migrate
 
 import matplotlib
 matplotlib.use('Agg')
@@ -28,15 +27,15 @@ if database_url and database_url.startswith('postgres://'):
 # Configure SQLAlchemy with the database URL
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql+psycopg2://postgres:raspberry@localhost/SensorReadings'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'yoursecretkey'
+#app.config['SECRET_KEY'] = 'yoursecretkey'
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)  # Initialize Flask-Migrate
 
-bcrypt = Bcrypt(app)
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'  # Route to redirect for login
-login_manager.login_message = "Please log in to access this page."
+#migrate = Migrate(app, db)  # Initialize Flask-Migrate
+#bcrypt = Bcrypt(app)
+#login_manager = LoginManager(app)
+#login_manager.login_view = 'login'  # Route to redirect for login
+#login_manager.login_message = "Please log in to access this page."
 
 class Timestamp(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,10 +47,48 @@ class Value(db.Model):
     timestamp_id = db.Column(db.Integer, db.ForeignKey('timestamp.id'), nullable=False)
     value = db.Column(db.Float)
 
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+# class User(UserMixin, db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     username = db.Column(db.String(150), unique=True, nullable=False)
+#     password = db.Column(db.String(150), nullable=False)
+
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return User.query.get(int(user_id))
+
+# # Registration route (optional)
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+#         new_user = User(username=username, password=hashed_password)
+#         db.session.add(new_user)
+#         db.session.commit()
+#         flash('Account created successfully! Please log in.', 'success')
+#         return redirect(url_for('login'))
+#     return render_template('register.html')
+
+# # Login route
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         user = User.query.filter_by(username=username).first()
+#         if user and bcrypt.check_password_hash(user.password, password):
+#             login_user(user)
+#             return redirect(url_for('index'))
+#         else:
+#             flash('Login failed. Check your credentials', 'danger')
+#     return render_template('login.html')
+
+# # Logout route
+# @app.route('/logout')
+# def logout():
+#     logout_user()
+#     return redirect(url_for('login'))
 
 # Define sensor positions
 sensor_positions = {
@@ -143,44 +180,6 @@ def get_summary_statistics(timestamps_data):
 
     return temp_summary, humidity_summary, weight_summary
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-# Registration route (optional)
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        new_user = User(username=username, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Account created successfully! Please log in.', 'success')
-        return redirect(url_for('login'))
-    return render_template('register.html')
-
-# Login route
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-        if user and bcrypt.check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('index'))
-        else:
-            flash('Login failed. Check your credentials', 'danger')
-    return render_template('login.html')
-
-# Logout route
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
-
 @app.route('/')
 def landing_page():
     latest_readings = get_latest_readings()
@@ -188,7 +187,7 @@ def landing_page():
     return render_template('landing_page.html', latest_readings=latest_readings)
 
 @app.route('/all_data')
-@login_required
+#@login_required
 def index():
     # Set default start_date and end_date to last 7 days
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
