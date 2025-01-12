@@ -1,5 +1,6 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import joinedload # For Faster Loading Database
 
 #from flask import Flask, redirect, url_for, flash
 #from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
