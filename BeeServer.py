@@ -63,13 +63,14 @@ sensor_positions = {
 # Function to retrieve all timestamps with their corresponding values
 def get_timestamps_with_values():
     with app.app_context():
-        timestamps = Timestamp.query.all()
+        #timestamps = Timestamp.query.all()
+        timestamps = Timestamp.query.options(joinedload(Timestamp.values)).order_by(Timestamp.timestamp).all()
         data = []
         for timestamp in timestamps:
             values = [value.value for value in timestamp.values]
             data.append({'timestamp': timestamp.timestamp, 'values': values})
         # Sort the data by timestamps
-        data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
+        #data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
         
         # Debug: Print the fetched data
         #print("Fetched Data:", data)
