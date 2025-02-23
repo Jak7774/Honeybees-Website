@@ -40,8 +40,11 @@ db = SQLAlchemy(app)
 
 class Timestamp(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.String(20))
-    values = db.relationship('Value', backref='timestamp', lazy=True)
+    timestamp = db.Column(db.String(20), unique=True, nullable=False)
+    
+    temperature = db.relationship('Temperature', backref='timestamp', lazy=True)
+    humidity = db.relationship('Humidity', backref='timestamp', lazy=True)
+    weight = db.relationship('Weight', backref='timestamp', lazy=True)
 
 # Define Temperature Table (4 columns)
 class Temperature(db.Model):
