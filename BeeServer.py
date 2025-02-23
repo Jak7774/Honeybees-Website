@@ -43,10 +43,27 @@ class Timestamp(db.Model):
     timestamp = db.Column(db.String(20))
     values = db.relationship('Value', backref='timestamp', lazy=True)
 
-class Value(db.Model):
+# Define Temperature Table (4 columns)
+class Temperature(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp_id = db.Column(db.Integer, db.ForeignKey('timestamp.id'), nullable=False)
-    value = db.Column(db.Float)
+    temp1 = db.Column(db.Float, nullable=False)
+    temp2 = db.Column(db.Float, nullable=False)
+    temp3 = db.Column(db.Float, nullable=False)
+    temp4 = db.Column(db.Float, nullable=False)
+
+# Define Humidity Table (2 columns)
+class Humidity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp_id = db.Column(db.Integer, db.ForeignKey('timestamp.id'), nullable=False)
+    humid1 = db.Column(db.Float, nullable=False)
+    humid2 = db.Column(db.Float, nullable=False)
+
+# Define Weight Table (1 column)
+class Weight(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp_id = db.Column(db.Integer, db.ForeignKey('timestamp.id'), nullable=False)
+    weight = db.Column(db.Float, nullable=False)
 
 # class User(UserMixin, db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -105,8 +122,20 @@ def get_timestamps_with_values():
         timestamps = Timestamp.query.options(joinedload(Timestamp.values)).order_by(Timestamp.timestamp).all()
         data = []
         for timestamp in timestamps:
-            values = [value.value for value in timestamp.values]
-            data.append({'timestamp': timestamp.timestamp, 'values': values})
+            temperature = Temperature.query.filter_by(timestamp_id=timestamp.id).first()
+            humidity = Humidity.query.filter_by(timestamp_id=timestamp.id).first()
+            weight = Weight.query.filter_by(timestamp_id=timestamp.id).first()
+            if temperature and humidity and weight:
+                data.append({
+                    'timestamp': timestamp.timestamp,
+                    'temp1': temperature.temp1,
+                    'temp2': temperature.temp2,
+                    'temp3': temperature.temp3,
+                    'temp4': temperature.temp4,
+                    'humid1': humidity.humid1,
+                    'humid2': humidity.humid2,
+                    'weight': weight.weight
+                })
         # Sort the data by timestamps
         #data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
         
@@ -137,8 +166,20 @@ def get_latest_readings():
     with app.app_context():
         latest_timestamp = Timestamp.query.order_by(Timestamp.id.desc()).first()
         if latest_timestamp:
-            latest_values = [value.value for value in latest_timestamp.values]
-            return {'timestamp': latest_timestamp.timestamp, 'values': latest_values}
+            temperature = Temperature.query.filter_by(timestamp_id=latest_timestamp.id).first()
+            humidity = Humidity.query.filter_by(timestamp_id=latest_timestamp.id).first()
+            weight = Weight.query.filter_by(timestamp_id=latest_timestamp.id).first()
+            if temperature and humidity and weight:
+                return {
+                    'timestamp': latest_timestamp.timestamp,
+                    'temp1': temperature.temp1,
+                    'temp2': temperature.temp2,
+                    'temp3': temperature.temp3,
+                    'temp4': temperature.temp4,
+                    'humid1': humidity.humid1,
+                    'humid2': humidity.humid2,
+                    'weight': weight.weight
+                }
         return None
 
 # Function to calculate summary statistics for a given set of data
@@ -172,9 +213,13 @@ def get_summary_statistics(timestamps_data):
         'Night': (time(0, 0), time(6, 0))
     }
 
-    temp_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['temperature']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['temperature'])]
-    humidity_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['humidity']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['humidity'])]
-    weight_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['weight']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['weight'])]
+    # temp_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['temperature']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['temperature'])]
+    # humidity_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['humidity']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['humidity'])]
+    # weight_data = [{'timestamp': entry['timestamp'], 'values': [entry['values'][i] for i in sensor_positions['weight']]} for entry in timestamps_data if len(entry['values']) > max(sensor_positions['weight'])]
+
+    temp_data = [{'timestamp': entry['timestamp'], 'values': [entry['temp1'], entry['temp2'], entry['temp3'], entry['temp4']]} for entry in timestamps_data]
+    humidity_data = [{'timestamp': entry['timestamp'], 'values': [entry['humid1'], entry['humid2']]} for entry in timestamps_data]
+    weight_data = [{'timestamp': entry['timestamp'], 'values': [entry['weight']]} for entry in timestamps_data]
 
     temp_summary = calculate_summary(temp_data, time_ranges)
     humidity_summary = calculate_summary(humidity_data, time_ranges)
@@ -211,27 +256,28 @@ def index():
 
     # Extracting data for plots with length checks
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_temp1 = [entry['values'][sensor_positions['temperature'][0]] if len(entry['values']) > sensor_positions['temperature'][0] else None for entry in timestamps_data]
-    all_temp2 = [entry['values'][sensor_positions['temperature'][1]] if len(entry['values']) > sensor_positions['temperature'][1] else None for entry in timestamps_data]
-    all_temp3 = [entry['values'][sensor_positions['temperature'][2]] if len(entry['values']) > sensor_positions['temperature'][2] else None for entry in timestamps_data]
-    all_temp4 = [entry['values'][sensor_positions['temperature'][3]] if len(entry['values']) > sensor_positions['temperature'][3] else None for entry in timestamps_data]
-    all_humidity1 = [entry['values'][sensor_positions['humidity'][0]] if len(entry['values']) > sensor_positions['humidity'][0] else None for entry in timestamps_data]
-    all_humidity2 = [entry['values'][sensor_positions['humidity'][1]] if len(entry['values']) > sensor_positions['humidity'][1] else None for entry in timestamps_data]
-    all_weight = [entry['values'][sensor_positions['weight'][0]] if len(entry['values']) > sensor_positions['weight'][0] else None for entry in timestamps_data]
+    all_temp1 = [entry['temp1'] for entry in timestamps_data]
+    all_temp2 = [entry['temp2'] for entry in timestamps_data]
+    all_temp3 = [entry['temp3'] for entry in timestamps_data]
+    all_temp4 = [entry['temp4'] for entry in timestamps_data]
+    all_humidity1 = [entry['humid1'] for entry in timestamps_data]
+    all_humidity2 = [entry['humid2'] for entry in timestamps_data]
+    all_weight = [entry['weight'] for entry in timestamps_data]
 
     # Filter data for specific time ranges
     filtered_data = filter_data_for_times(timestamps_data)
 
     # Extracting data for table with length checks
     timestamps = [entry['timestamp'] for entry in filtered_data]
-    temp1 = [entry['values'][sensor_positions['temperature'][0]] if len(entry['values']) > sensor_positions['temperature'][0] else None for entry in filtered_data]
-    temp2 = [entry['values'][sensor_positions['temperature'][1]] if len(entry['values']) > sensor_positions['temperature'][1] else None for entry in filtered_data]
-    temp3 = [entry['values'][sensor_positions['temperature'][2]] if len(entry['values']) > sensor_positions['temperature'][2] else None for entry in filtered_data]
-    temp4 = [entry['values'][sensor_positions['temperature'][3]] if len(entry['values']) > sensor_positions['temperature'][3] else None for entry in filtered_data]
-    humidity1 = [entry['values'][sensor_positions['humidity'][0]] if len(entry['values']) > sensor_positions['humidity'][0] else None for entry in filtered_data]
-    humidity2 = [entry['values'][sensor_positions['humidity'][1]] if len(entry['values']) > sensor_positions['humidity'][1] else None for entry in filtered_data]
-    weight = [entry['values'][sensor_positions['weight'][0]] if len(entry['values']) > sensor_positions['weight'][0] else None for entry in filtered_data]
-    
+
+    temp1 = [entry['temp1'] for entry in filtered_data]
+    temp2 = [entry['temp2'] for entry in filtered_data]
+    temp3 = [entry['temp3'] for entry in filtered_data]
+    temp4 = [entry['temp4'] for entry in filtered_data]
+    humidity1 = [entry['humid1'] for entry in filtered_data]
+    humidity2 = [entry['humid2'] for entry in filtered_data]
+    weight = [entry['weight'] for entry in filtered_data]
+
     # Debug: Print the filtered data
     #print("Filtered Data for Table:", filtered_data)
 
@@ -334,10 +380,10 @@ def temperature_page():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_temp1 = [entry['values'][sensor_positions['temperature'][0]] if len(entry['values']) > sensor_positions['temperature'][0] else None for entry in timestamps_data]
-    all_temp2 = [entry['values'][sensor_positions['temperature'][1]] if len(entry['values']) > sensor_positions['temperature'][1] else None for entry in timestamps_data]
-    all_temp3 = [entry['values'][sensor_positions['temperature'][2]] if len(entry['values']) > sensor_positions['temperature'][2] else None for entry in timestamps_data]
-    all_temp4 = [entry['values'][sensor_positions['temperature'][3]] if len(entry['values']) > sensor_positions['temperature'][3] else None for entry in timestamps_data]
+    all_temp1 = [entry['temp1'] for entry in timestamps_data]
+    all_temp2 = [entry['temp2'] for entry in timestamps_data]
+    all_temp3 = [entry['temp3'] for entry in timestamps_data]
+    all_temp4 = [entry['temp4'] for entry in timestamps_data]
 
     maxtick = 6
     plt.figure(figsize=(12, 6))
@@ -385,8 +431,8 @@ def humidity_page():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_humidity1 = [entry['values'][sensor_positions['humidity'][0]] if len(entry['values']) > sensor_positions['humidity'][0] else None for entry in timestamps_data]
-    all_humidity2 = [entry['values'][sensor_positions['humidity'][1]] if len(entry['values']) > sensor_positions['humidity'][1] else None for entry in timestamps_data]
+    all_humidity1 = [entry['humid1'] for entry in timestamps_data]
+    all_humidity2 = [entry['humid2'] for entry in timestamps_data]
 
     maxtick = 6
     plt.figure(figsize=(12, 6))
@@ -430,7 +476,7 @@ def weight_page():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_weight = [entry['values'][sensor_positions['weight'][0]] if len(entry['values']) > sensor_positions['weight'][0] else None for entry in timestamps_data]
+    all_weight = [entry['weight'] for entry in timestamps_data]
 
     maxtick = 6
     plt.figure(figsize=(12, 6))
@@ -467,10 +513,10 @@ def export_temperature():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_temp1 = [entry['values'][sensor_positions['temperature'][0]] if len(entry['values']) > sensor_positions['temperature'][0] else None for entry in timestamps_data]
-    all_temp2 = [entry['values'][sensor_positions['temperature'][1]] if len(entry['values']) > sensor_positions['temperature'][1] else None for entry in timestamps_data]
-    all_temp3 = [entry['values'][sensor_positions['temperature'][2]] if len(entry['values']) > sensor_positions['temperature'][2] else None for entry in timestamps_data]
-    all_temp4 = [entry['values'][sensor_positions['temperature'][3]] if len(entry['values']) > sensor_positions['temperature'][3] else None for entry in timestamps_data]
+    all_temp1 = [entry['temp1'] for entry in timestamps_data]
+    all_temp2 = [entry['temp2'] for entry in timestamps_data]
+    all_temp3 = [entry['temp3'] for entry in timestamps_data]
+    all_temp4 = [entry['temp4'] for entry in timestamps_data]
 
     # Create a CSV string
     csv_data = 'Timestamp,Brood Temp,Super Temp,Outside Temp,Roof Temp\n'
@@ -496,9 +542,9 @@ def export_humidity():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_humidity1 = [entry['values'][sensor_positions['humidity'][0]] if len(entry['values']) > sensor_positions['humidity'][0] else None for entry in timestamps_data]
-    all_humidity2 = [entry['values'][sensor_positions['humidity'][1]] if len(entry['values']) > sensor_positions['humidity'][1] else None for entry in timestamps_data]
-    
+    all_humidity1 = [entry['humid1'] for entry in timestamps_data]
+    all_humidity2 = [entry['humid2'] for entry in timestamps_data]
+
     # Create a CSV string
     csv_data = 'Timestamp,Outside Humidity,Roof Humidity\n'
     for i in range(len(all_timestamps)):
@@ -523,7 +569,7 @@ def export_weight():
         timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
-    all_weight = [entry['values'][sensor_positions['weight'][0]] if len(entry['values']) > sensor_positions['weight'][0] else None for entry in timestamps_data]
+    all_weight = [entry['weight'] for entry in timestamps_data]
 
     # Create a CSV string
     csv_data = 'Timestamp,Weight\n'
@@ -542,38 +588,53 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+# Function to process and store incoming sensor data
 @app.route('/post_endpoint', methods=['POST'])
 def post_endpoint():
     if request.method == 'POST':
         try:
-            # Parse JSON request
             data = request.get_json()
             if not data:
                 return jsonify({"error": "Invalid JSON"}), 400
 
             # Extract timestamp and sensor values
             timestamp_str = data.get('timestamp')
+            if not timestamp_str:
+                return jsonify({"error": "Missing timestamp"}), 400
+
             required_keys = ["temp1", "temp2", "humid1", "temp3", "humid2", "temp4", "weight"]
+            if any(key not in data for key in required_keys):
+                return jsonify({"error": "Missing sensor values"}), 400
 
-            # Ensure all required keys are present
-            if not timestamp_str or any(key not in data for key in required_keys):
-                return jsonify({"error": "Missing timestamp or sensor values"}), 400
-
-            # Extract values in the correct order
-            ordered_values = [data[key] for key in required_keys]
-
-            # Convert values to a comma-separated string
-            values_str = ",".join(map(str, ordered_values))
-
-            # Save to the Timestamp table
+            # Store timestamp
             timestamp = Timestamp(timestamp=timestamp_str)
             db.session.add(timestamp)
             db.session.commit()
 
-            # Save to the Value table
-            for val in ordered_values:
-                value_entry = Value(timestamp_id=timestamp.id, value=val)
-                db.session.add(value_entry)
+            # Store temperature readings
+            temperature_entry = Temperature(
+                timestamp_id=timestamp.id,
+                temp1=data["temp1"],
+                temp2=data["temp2"],
+                temp3=data["temp3"],
+                temp4=data["temp4"]
+            )
+            db.session.add(temperature_entry)
+
+            # Store humidity readings
+            humidity_entry = Humidity(
+                timestamp_id=timestamp.id,
+                humid1=data["humid1"],
+                humid2=data["humid2"]
+            )
+            db.session.add(humidity_entry)
+
+            # Store weight reading
+            weight_entry = Weight(
+                timestamp_id=timestamp.id,
+                weight=data["weight"]
+            )
+            db.session.add(weight_entry)
 
             db.session.commit()
             return jsonify({"message": "Data added successfully"}), 200
