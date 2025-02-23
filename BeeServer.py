@@ -118,26 +118,31 @@ sensor_positions = {
     'weight': [6]
 }
 
-# Function to retrieve all timestamps with their corresponding values
 def get_timestamps_with_values():
     with app.app_context():
-        timestamps = Timestamp.query.order_by(Timestamp.timestamp).all()
+        timestamps = (
+            Timestamp.query
+            .options(
+                joinedload(Timestamp.temperature),
+                joinedload(Timestamp.humidity),
+                joinedload(Timestamp.weight)
+            )
+            .order_by(Timestamp.timestamp)
+            .all()
+        )
+        
         data = []
         for timestamp in timestamps:
-            temperature = Temperature.query.filter_by(timestamp_id=timestamp.id).first()
-            humidity = Humidity.query.filter_by(timestamp_id=timestamp.id).first()
-            weight = Weight.query.filter_by(timestamp_id=timestamp.id).first()
-
-            if temperature and humidity and weight:
+            if timestamp.temperature and timestamp.humidity and timestamp.weight:
                 data.append({
                     'timestamp': timestamp.timestamp,
-                    'temp1': temperature.temp1,
-                    'temp2': temperature.temp2,
-                    'temp3': temperature.temp3,
-                    'temp4': temperature.temp4,
-                    'humid1': humidity.humid1,
-                    'humid2': humidity.humid2,
-                    'weight': weight.weight
+                    'temp1': timestamp.temperature.temp1,
+                    'temp2': timestamp.temperature.temp2,
+                    'temp3': timestamp.temperature.temp3,
+                    'temp4': timestamp.temperature.temp4,
+                    'humid1': timestamp.humidity.humid1,
+                    'humid2': timestamp.humidity.humid2,
+                    'weight': timestamp.weight.weight
                 })
         return data
 
