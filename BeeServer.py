@@ -546,25 +546,40 @@ def favicon():
 def post_endpoint():
     if request.method == 'POST':
         try:
-            data = request.form.to_dict()
-            timestamp_str = data.get('timestamp')
-            values_str = data.get('values')
-            
-            if not timestamp_str or not values_str:
-                return jsonify({"error": "Missing timestamp or values"}), 400
+            # Parse JSON request
+            data = request.get_json()
+            if not data:
+                return jsonify({"error": "Invalid JSON"}), 400
 
+            # Extract timestamp and sensor values
+            timestamp_str = data.get('timestamp')
+            required_keys = ["temp1", "temp2", "humid1", "temp3", "humid2", "temp4", "weight"]
+
+            # Ensure all required keys are present
+            if not timestamp_str or any(key not in data for key in required_keys):
+                return jsonify({"error": "Missing timestamp or sensor values"}), 400
+
+            # Extract values in the correct order
+            ordered_values = [data[key] for key in required_keys]
+
+            # Convert values to a comma-separated string
+            values_str = ",".join(map(str, ordered_values))
+
+            # Save to the Timestamp table
             timestamp = Timestamp(timestamp=timestamp_str)
             db.session.add(timestamp)
             db.session.commit()
 
-            values_list = [float(val) for val in values_str.split(',')]
-            for val in values_list:
-                value = Value(timestamp_id=timestamp.id, value=val)
-                db.session.add(value)
-            
+            # Save to the Value table
+            for val in ordered_values:
+                value_entry = Value(timestamp_id=timestamp.id, value=val)
+                db.session.add(value_entry)
+
             db.session.commit()
             return jsonify({"message": "Data added successfully"}), 200
+
         except Exception as e:
+            db.session.rollback()  # Roll back changes on error
             return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
