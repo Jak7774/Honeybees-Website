@@ -121,13 +121,13 @@ sensor_positions = {
 # Function to retrieve all timestamps with their corresponding values
 def get_timestamps_with_values():
     with app.app_context():
-        #timestamps = Timestamp.query.all()
-        timestamps = Timestamp.query.options(joinedload(Timestamp.values)).order_by(Timestamp.timestamp).all()
+        timestamps = Timestamp.query.order_by(Timestamp.timestamp).all()
         data = []
         for timestamp in timestamps:
             temperature = Temperature.query.filter_by(timestamp_id=timestamp.id).first()
             humidity = Humidity.query.filter_by(timestamp_id=timestamp.id).first()
             weight = Weight.query.filter_by(timestamp_id=timestamp.id).first()
+
             if temperature and humidity and weight:
                 data.append({
                     'timestamp': timestamp.timestamp,
@@ -139,13 +139,8 @@ def get_timestamps_with_values():
                     'humid2': humidity.humid2,
                     'weight': weight.weight
                 })
-        # Sort the data by timestamps
-        #data.sort(key=lambda x: datetime.strptime(x['timestamp'], '%d/%m/%YT%H:%M:%S'))
-        
-        # Debug: Print the fetched data
-        #print("Fetched Data:", data)
-        
         return data
+
 
 # Function to filter data points for specific time ranges of the day
 def filter_data_for_times(timestamps_data):
