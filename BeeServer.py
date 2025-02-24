@@ -133,18 +133,23 @@ def get_timestamps_with_values():
         
         data = []
         for timestamp in timestamps:
-            if timestamp.temperature and timestamp.humidity and timestamp.weight:
+            temperature = timestamp.temperature[0] if timestamp.temperature else None
+            humidity = timestamp.humidity[0] if timestamp.humidity else None
+            weight = timestamp.weight[0] if timestamp.weight else None
+
+            if temperature and humidity and weight:
                 data.append({
                     'timestamp': timestamp.timestamp,
-                    'temp1': timestamp.temperature.temp1,
-                    'temp2': timestamp.temperature.temp2,
-                    'temp3': timestamp.temperature.temp3,
-                    'temp4': timestamp.temperature.temp4,
-                    'humid1': timestamp.humidity.humid1,
-                    'humid2': timestamp.humidity.humid2,
-                    'weight': timestamp.weight.weight
+                    'temp1': temperature.temp1,
+                    'temp2': temperature.temp2,
+                    'temp3': temperature.temp3,
+                    'temp4': temperature.temp4,
+                    'humid1': humidity.humid1,
+                    'humid2': humidity.humid2,
+                    'weight': weight.weight
                 })
         return data
+
 
 
 # Function to filter data points for specific time ranges of the day
