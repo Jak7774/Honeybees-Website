@@ -1,6 +1,7 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import joinedload # For Faster Loading Database
+from sqlalchemy import distinct
 
 #from flask import Flask, redirect, url_for, flash
 #from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
@@ -26,7 +27,7 @@ if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql+psycopg2://', 1)
 
 # Configure SQLAlchemy with the database URL
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql+psycopg2://postgres:raspberry@localhost/SensorReadings'
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql+psycopg2://postgres:raspberry@localhost:5433/SensorReadings'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #app.config['SECRET_KEY'] = 'yoursecretkey'
 
@@ -41,6 +42,7 @@ db = SQLAlchemy(app)
 class Timestamp(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.String(20), unique=True, nullable=False)
+    beehive_id = db.Column(db.Integer, nullable=False)
     
     temperature = db.relationship('Temperature', backref='timestamp', lazy=True)
     humidity = db.relationship('Humidity', backref='timestamp', lazy=True)
@@ -68,10 +70,11 @@ class Weight(db.Model):
     timestamp_id = db.Column(db.Integer, db.ForeignKey('timestamp.id'), nullable=False)
     weight = db.Column(db.Float, nullable=False)
 
-# class User(UserMixin, db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     username = db.Column(db.String(150), unique=True, nullable=False)
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
 #     password = db.Column(db.String(150), nullable=False)
+    beehive_id = db.Column(db.Integer, nullable=False)
 
 # @login_manager.user_loader
 # def load_user(user_id):
@@ -111,25 +114,20 @@ class Weight(db.Model):
 #     logout_user()
 #     return redirect(url_for('login'))
 
-# Define sensor positions
-sensor_positions = {
-    'temperature': [0, 1, 3, 5],
-    'humidity': [2, 4],
-    'weight': [6]
-}
+# ---------------------------------------------------------
+# Helper Functions (optionally filter by bee_hive_id)
+# ---------------------------------------------------------
 
-def get_timestamps_with_values():
+def get_timestamps_with_values(beehive_id=None):
     with app.app_context():
-        timestamps = (
-            Timestamp.query
-            .options(
+        query = Timestamp.query.options(
                 joinedload(Timestamp.temperature),
                 joinedload(Timestamp.humidity),
                 joinedload(Timestamp.weight)
-            )
-            .order_by(Timestamp.timestamp)
-            .all()
-        )
+        ).order_by(Timestamp.timestamp)
+        if beehive_id:
+            query = query.filter_by(beehive_id=beehive_id)
+        timestamps = query.all()
         
         data = []
         for timestamp in timestamps:
@@ -140,6 +138,7 @@ def get_timestamps_with_values():
             if temperature and humidity and weight:
                 data.append({
                     'timestamp': timestamp.timestamp,
+                    'beehive_id': timestamp.beehive_id,
                     'temp1': temperature.temp1,
                     'temp2': temperature.temp2,
                     'temp3': temperature.temp3,
@@ -170,9 +169,12 @@ def filter_data_for_times(timestamps_data):
     return filtered_data
 
 # Function to get the most recent sensor readings
-def get_latest_readings():
+def get_latest_readings(beehive_id=None):
     with app.app_context():
-        latest_timestamp = Timestamp.query.order_by(Timestamp.id.desc()).first()
+        query = Timestamp.query.order_by(Timestamp.id.desc())
+        if beehive_id:
+            query = query.filter_by(beehive_id=beehive_id)
+        latest_timestamp = query.first()
         if latest_timestamp:
             temperature = Temperature.query.filter_by(timestamp_id=latest_timestamp.id).first()
             humidity = Humidity.query.filter_by(timestamp_id=latest_timestamp.id).first()
@@ -180,6 +182,7 @@ def get_latest_readings():
             if temperature and humidity and weight:
                 return {
                     'timestamp': latest_timestamp.timestamp,
+                    'beehive_id': latest_timestamp.beehive_id,
                     'temp1': temperature.temp1,
                     'temp2': temperature.temp2,
                     'temp3': temperature.temp3,
@@ -235,15 +238,61 @@ def get_summary_statistics(timestamps_data):
 
     return temp_summary, humidity_summary, weight_summary
 
+# ---------------------------------------------------------
+# Webserver Routes
+# ---------------------------------------------------------
+
+@app.context_processor
+def inject_hives():
+    # 1. Grab all the distinct hive IDs
+    hive_list = [row[0] for row in db.session.query(distinct(Timestamp.beehive_id)).order_by(Timestamp.beehive_id.asc()).all()]
+    # 2. Read current hive from query (fallback to first hive if none)
+    current = request.args.get('beehive_id', type=int)
+
+    # Check if it's the landing page, and set current to None if so
+    if current is None and hive_list:
+        current = hive_list[0]
+    if request.endpoint == 'landing_page':
+        current = None  # This will prevent hive tabs from being shown on the landing page
+
+    return {
+        'hive_list': hive_list,
+        'current_beehive_id': current
+    }
+
 @app.route('/')
 def landing_page():
-    latest_readings = get_latest_readings()
-    print(latest_readings)
-    return render_template('landing_page.html', latest_readings=latest_readings)
+    # Get all distinct hive IDs
+    hive_ids = [row[0] for row in db.session.query(distinct(Timestamp.beehive_id)).order_by(Timestamp.beehive_id).all()]
 
-@app.route('/all_data')
+    # Get latest readings for each hive
+    latest_readings_list = []
+    for hive_id in hive_ids:
+        latest = get_latest_readings(hive_id)
+        if latest:
+            latest_readings_list.append(latest)
+
+    return render_template('landing_page.html', latest_readings_list=latest_readings_list)
+
+@app.route('/all_data', endpoint='all_data')
 #@login_required
 def index():
+    # Retrieve beehive_id from request
+    beehive_id = request.args.get('beehive_id', type=int)
+
+    # If none provided, pull the very first hive_id in the DB
+    if beehive_id is None:
+        first_row = (
+            db.session.query(Timestamp.beehive_id)
+            .distinct()
+            .order_by(Timestamp.beehive_id.asc()) # Order so lowest ID is first
+            .first()
+        )
+        if first_row:
+            beehive_id = first_row[0]
+        else:
+            return "No beehives found in the database", 404
+
     # Set default start_date and end_date to last 7 days
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
@@ -254,13 +303,17 @@ def index():
     if 'end_date' in request.args:
         end_date = request.args['end_date']
 
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values(beehive_id)
+
+    # Fetch all distinct hive IDs for the tabs
+    hive_list = [row[0] for row in db.session.query(distinct(Timestamp.beehive_id)).order_by(Timestamp.beehive_id.asc()).all()]
 
     # Filter data by date range if start_date and end_date are provided
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
+        timestamps_data = [entry for entry in timestamps_data 
+                           if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
 
     # Extracting data for plots with length checks
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
@@ -296,7 +349,10 @@ def index():
     maxtick = 6
     plt.figure(figsize=(12, 6))
 
+    # --------------------
     # Temperature plot
+    # --------------------
+
     plt.plot(all_timestamps, all_temp1, color='red', label='Brood')
     plt.plot(all_timestamps, all_temp2, color='blue', label='Super')
     plt.plot(all_timestamps, all_temp3, color='green', label='Outside')
@@ -319,7 +375,10 @@ def index():
     plt.savefig(temp_plot_path)
     plt.close()
 
+    # --------------------
     # Plotting Humidity
+    # --------------------
+
     plt.figure(figsize=(12, 6))
     plt.plot(all_timestamps, all_humidity1, color='cyan', label='Outside')
     plt.plot(all_timestamps, all_humidity2, color='magenta', label='Roof')
@@ -336,7 +395,10 @@ def index():
     plt.savefig(humidity_plot_path)
     plt.close()
 
+    # --------------------
     # Plotting Weight
+    # --------------------
+
     plt.figure(figsize=(12, 6))
     plt.plot(all_timestamps, all_weight, color='black', label='Weight')
 
@@ -367,10 +429,15 @@ def index():
                            weight=weight,
                            temp_summary=temp_summary,
                            humidity_summary=humidity_summary,
-                           weight_summary=weight_summary)
+                           weight_summary=weight_summary,
+                           beehive_id=beehive_id,
+                           hive_list=hive_list,
+)
 
 @app.route('/temperature')
 def temperature_page():
+    beehive_id = request.args.get('beehive_id', type=int)
+
     # Set default start_date and end_date to last 7 days
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
@@ -380,7 +447,7 @@ def temperature_page():
     if 'end_date' in request.args:
         end_date = request.args['end_date']
 
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values(beehive_id)
 
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
@@ -392,6 +459,10 @@ def temperature_page():
     all_temp2 = [entry['temp2'] for entry in timestamps_data]
     all_temp3 = [entry['temp3'] for entry in timestamps_data]
     all_temp4 = [entry['temp4'] for entry in timestamps_data]
+
+    # -------------------
+    # Generate Plot
+    # -------------------
 
     maxtick = 6
     plt.figure(figsize=(12, 6))
@@ -423,6 +494,8 @@ def temperature_page():
 
 @app.route('/humidity')
 def humidity_page():
+    beehive_id = request.args.get('beehive_id', type=int)
+
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
 
@@ -431,7 +504,7 @@ def humidity_page():
     if 'end_date' in request.args:
         end_date = request.args['end_date']
 
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values(beehive_id)
 
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
@@ -442,6 +515,10 @@ def humidity_page():
     all_humidity1 = [entry['humid1'] for entry in timestamps_data]
     all_humidity2 = [entry['humid2'] for entry in timestamps_data]
 
+    # -------------------
+    # Generate Plot
+    # -------------------
+    
     maxtick = 6
     plt.figure(figsize=(12, 6))
     plt.plot(all_timestamps, all_humidity1, color='cyan', label='Outside')
@@ -468,6 +545,8 @@ def humidity_page():
 
 @app.route('/weight')
 def weight_page():
+    beehive_id = request.args.get('beehive_id', type=int)
+
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
 
@@ -476,7 +555,7 @@ def weight_page():
     if 'end_date' in request.args:
         end_date = request.args['end_date']
 
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values(beehive_id)
 
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
@@ -485,6 +564,10 @@ def weight_page():
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_weight = [entry['weight'] for entry in timestamps_data]
+
+    # -------------------
+    # Generate Plot
+    # -------------------
 
     maxtick = 6
     plt.figure(figsize=(12, 6))
@@ -510,8 +593,10 @@ def weight_page():
 
 @app.route('/export_temperature', methods=['GET'])
 def export_temperature():
+    beehive_id = request.args.get('beehive_id', type=int)
+
     # Fetch the filtered data (same logic as in the temperature route)
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values(beehive_id)
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
@@ -539,8 +624,10 @@ def export_temperature():
 
 @app.route('/export_humidity', methods=['GET'])
 def export_humidity():
+    beehive_id = request.args.get('beehive_id', type=int)
+
     # Fetch the filtered data (same logic as in the humidity route)
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values(beehive_id)
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
@@ -566,8 +653,10 @@ def export_humidity():
 
 @app.route('/export_weight', methods=['GET'])
 def export_weight():
+    beehive_id = request.args.get('beehive_id', type=int)
+
     # Fetch the filtered data (same logic as in the weight route)
-    timestamps_data = get_timestamps_with_values()
+    timestamps_data = get_timestamps_with_values(beehive_id)
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
@@ -607,15 +696,18 @@ def post_endpoint():
 
             # Extract timestamp and sensor values
             timestamp_str = data.get('timestamp')
+            beehive_id = data.get('beehive_id')
             if not timestamp_str:
                 return jsonify({"error": "Missing timestamp"}), 400
+            if beehive_id is None:
+                return jsonify({"error": "Missing Beehive ID"}), 400
 
             required_keys = ["temp1", "temp2", "humid1", "temp3", "humid2", "temp4", "weight"]
             if any(key not in data for key in required_keys):
                 return jsonify({"error": "Missing sensor values"}), 400
 
             # Store timestamp
-            timestamp = Timestamp(timestamp=timestamp_str)
+            timestamp = Timestamp(timestamp=timestamp_str, beehive_id=beehive_id)
             db.session.add(timestamp)
             db.session.commit()
 
