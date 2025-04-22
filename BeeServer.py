@@ -490,7 +490,8 @@ def temperature_page():
                            temp1=all_temp1,
                            temp2=all_temp2,
                            temp3=all_temp3,
-                           temp4=all_temp4)
+                           temp4=all_temp4,
+                           beehive_id=beehive_id)
 
 @app.route('/humidity')
 def humidity_page():
@@ -541,7 +542,8 @@ def humidity_page():
                            humidity_plot_path='/static/humidity_plot.png',
                            timestamps=all_timestamps,
                            humidity1=all_humidity1,
-                           humidity2=all_humidity2)
+                           humidity2=all_humidity2,
+                           beehive_id=beehive_id)
 
 @app.route('/weight')
 def weight_page():
@@ -589,7 +591,8 @@ def weight_page():
     return render_template('weight.html',
                            weight_plot_path='/static/weight_plot.png',
                            timestamps=all_timestamps,
-                           weight=all_weight)
+                           weight=all_weight,
+                           beehive_id=beehive_id)
 
 @app.route('/export_temperature', methods=['GET'])
 def export_temperature():
