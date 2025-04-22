@@ -437,6 +437,18 @@ def index():
 @app.route('/temperature')
 def temperature_page():
     beehive_id = request.args.get('beehive_id', type=int)
+    # If none provided, pull the very first hive_id in the DB
+    if beehive_id is None:
+        first_row = (
+            db.session.query(Timestamp.beehive_id)
+            .distinct()
+            .order_by(Timestamp.beehive_id.asc()) # Order so lowest ID is first
+            .first()
+        )
+        if first_row:
+            beehive_id = first_row[0]
+        else:
+            return "No beehives found in the database", 404
 
     # Set default start_date and end_date to last 7 days
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
@@ -496,7 +508,19 @@ def temperature_page():
 @app.route('/humidity')
 def humidity_page():
     beehive_id = request.args.get('beehive_id', type=int)
-
+    # If none provided, pull the very first hive_id in the DB
+    if beehive_id is None:
+        first_row = (
+            db.session.query(Timestamp.beehive_id)
+            .distinct()
+            .order_by(Timestamp.beehive_id.asc()) # Order so lowest ID is first
+            .first()
+        )
+        if first_row:
+            beehive_id = first_row[0]
+        else:
+            return "No beehives found in the database", 404
+            
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
 
@@ -548,6 +572,18 @@ def humidity_page():
 @app.route('/weight')
 def weight_page():
     beehive_id = request.args.get('beehive_id', type=int)
+    # If none provided, pull the very first hive_id in the DB
+    if beehive_id is None:
+        first_row = (
+            db.session.query(Timestamp.beehive_id)
+            .distinct()
+            .order_by(Timestamp.beehive_id.asc()) # Order so lowest ID is first
+            .first()
+        )
+        if first_row:
+            beehive_id = first_row[0]
+        else:
+            return "No beehives found in the database", 404
 
     end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
