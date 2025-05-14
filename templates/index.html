@@ -280,11 +280,11 @@
             document.getElementById('start_date').value = startDate;
             document.getElementById('end_date').value = endDate;
 
-            // Ensure hive_id is included before submission
-            const hiveId = document.getElementById('hive_id').value;
+            // Ensure beehive_id is included before submission
+            const hiveId = document.getElementById('beehive_id').value;
             if (!hiveId) {
                 console.warn("No hive_id set! Defaulting to 1.");
-                document.getElementById('hive_id').value = '1';
+                document.getElementById('beehive_id').value = '1';
             }
 
             // Submit the form programmatically
@@ -299,11 +299,11 @@
             document.getElementById('start_date').value = startDate;
             document.getElementById('end_date').value = endDate;
 
-            // Ensure hive_id is preserved
-            const hiveId = document.getElementById('hive_id').value;
+            // Ensure beehive_id is preserved
+            const hiveId = document.getElementById('beehive_id').value;
             if (!hiveId) {
                 console.warn("No hive_id set! Defaulting to 1.");
-                document.getElementById('hive_id').value = '1';
+                document.getElementById('beehive_id').value = '1';
             }
 
             // Submit the form programmatically
