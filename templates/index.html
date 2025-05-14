@@ -22,6 +22,7 @@
         </div>
         
         <form id="filter_form" action="/all_data" method="GET" class="mb-3">
+            <input type="hidden" id="hive_id" name="hive_id" value="{{ hive_id }}">
             <div class="row align-items-end g-3">
                 <div class="col-md-auto">
                     <div class="d-flex align-items-center">
@@ -279,6 +280,13 @@
             document.getElementById('start_date').value = startDate;
             document.getElementById('end_date').value = endDate;
 
+            // Ensure hive_id is included before submission
+            const hiveId = document.getElementById('hive_id').value;
+            if (!hiveId) {
+                console.warn("No hive_id set! Defaulting to 1.");
+                document.getElementById('hive_id').value = '1';
+            }
+
             // Submit the form programmatically
             document.getElementById('filter_form').submit();
         }
@@ -290,6 +298,13 @@
 
             document.getElementById('start_date').value = startDate;
             document.getElementById('end_date').value = endDate;
+
+            // Ensure hive_id is preserved
+            const hiveId = document.getElementById('hive_id').value;
+            if (!hiveId) {
+                console.warn("No hive_id set! Defaulting to 1.");
+                document.getElementById('hive_id').value = '1';
+            }
 
             // Submit the form programmatically
             document.getElementById('filter_form').submit();
