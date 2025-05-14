@@ -10,6 +10,7 @@
 
 <!-- Filter Form -->
 <form id="filter_form" action="/temperature" method="GET" class="mb-3">
+    <input type="hidden" id="beehive_id" name="beehive_id" value="{{ beehive_id }}">
     <div class="row align-items-end g-3">
         <div class="col-md-auto">
             <label for="start_date" class="col-form-label">Start Date:</label>
