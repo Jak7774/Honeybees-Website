@@ -162,7 +162,7 @@ def filter_data_for_times(timestamps_data):
     ]
     for entry in timestamps_data:
         timestamp_str = entry['timestamp']
-        timestamp = datetime.strptime(timestamp_str, '%d/%m/%YT%H:%M:%S')
+        timestamp = datetime.strptime(timestamp_str, '%d/%m/%YT%H:%M:%S.%f')
         entry_time = timestamp.time()
         if any(start <= entry_time <= end for start, end in time_ranges):
             filtered_data.append(entry)
@@ -198,7 +198,7 @@ def calculate_summary(data, time_ranges):
     summary = {period: {'mean': None, 'min': None, 'max': None, 'count': 0} for period in time_ranges.keys()}
     for entry in data:
         timestamp_str = entry['timestamp']
-        timestamp = datetime.strptime(timestamp_str, '%d/%m/%YT%H:%M:%S')
+        timestamp = datetime.strptime(timestamp_str, '%d/%m/%YT%H:%M:%S.%f')
         entry_time = timestamp.time()
         for period, (start, end) in time_ranges.items():
             if start <= entry_time < end:
@@ -313,7 +313,7 @@ def index():
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
         timestamps_data = [entry for entry in timestamps_data 
-                           if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
+                           if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S.%f') <= end_datetime]
 
     # Extracting data for plots with length checks
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
@@ -464,7 +464,7 @@ def temperature_page():
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
+        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S.%f') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_temp1 = [entry['temp1'] for entry in timestamps_data]
@@ -534,7 +534,7 @@ def humidity_page():
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
+        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S.%f') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_humidity1 = [entry['humid1'] for entry in timestamps_data]
@@ -598,7 +598,7 @@ def weight_page():
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
+        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S.%f') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_weight = [entry['weight'] for entry in timestamps_data]
@@ -642,7 +642,7 @@ def export_temperature():
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
+        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S.%f') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_temp1 = [entry['temp1'] for entry in timestamps_data]
@@ -673,7 +673,7 @@ def export_humidity():
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
+        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S.%f') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_humidity1 = [entry['humid1'] for entry in timestamps_data]
@@ -702,7 +702,7 @@ def export_weight():
     if start_date and end_date:
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S') <= end_datetime]
+        timestamps_data = [entry for entry in timestamps_data if start_datetime <= datetime.strptime(entry['timestamp'], '%d/%m/%YT%H:%M:%S.%f') <= end_datetime]
 
     all_timestamps = [entry['timestamp'] for entry in timestamps_data]
     all_weight = [entry['weight'] for entry in timestamps_data]
