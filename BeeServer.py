@@ -741,9 +741,9 @@ def post_endpoint():
             if beehive_id is None:
                 return jsonify({"error": "Missing Beehive ID"}), 400
 
-            required_keys = ["temp1", "temp2", "humid1", "temp3", "humid2", "temp4", "weight"]
-            if any(key not in data for key in required_keys):
-                return jsonify({"error": "Missing sensor values"}), 400
+            # required_keys = ["temp1", "temp2", "humid1", "temp3", "humid2", "temp4", "weight"]
+            # if any(key not in data for key in required_keys):
+            #     return jsonify({"error": "Missing sensor values"}), 400
 
             # Store timestamp
             timestamp = Timestamp(timestamp=timestamp_str, beehive_id=beehive_id)
