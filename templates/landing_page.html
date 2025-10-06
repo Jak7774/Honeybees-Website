@@ -25,10 +25,10 @@
                             Temperature
                         </h4>
                         <ul class="list-group">
-                            <li class="list-group-item">Brood: {{ reading['temp1'] }} °C</li>
-                            <li class="list-group-item">Super: {{ reading['temp2'] }} °C</li>
-                            <li class="list-group-item">Roof: {{ reading['temp4'] }} °C</li>
-                            <li class="list-group-item">Outside: {{ reading['temp3'] }} °C</li>
+                            <li class="list-group-item temp-brood">Brood: {{ reading['temp1'] }} °C</li>
+                            <li class="list-group-item temp-super">Super: {{ reading['temp2'] }} °C</li>
+                            <li class="list-group-item temp-roof">Roof: {{ reading['temp4'] }} °C</li>
+                            <li class="list-group-item temp-outside">Outside: {{ reading['temp3'] }} °C</li>
                         </ul>
                     </div>
                     <div class="col-md-4">
@@ -37,8 +37,8 @@
                             Humidity
                         </h4>
                         <ul class="list-group">
-                            <li class="list-group-item">Outside: {{ reading['humid1'] }} %</li>
-                            <li class="list-group-item">Roof: {{ reading['humid2'] }} %</li>
+                            <li class="list-group-item humid-outside">Outside: {{ reading['humid1'] }} %</li>
+                            <li class="list-group-item humid-roof">Roof: {{ reading['humid2'] }} %</li>
                         </ul>
                     </div>
                     <div class="col-md-4">
@@ -62,3 +62,4 @@
     {% endif %}
 </div>
 {% endblock %}
+
