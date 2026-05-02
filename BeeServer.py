@@ -149,8 +149,6 @@ def get_timestamps_with_values(beehive_id=None):
                 })
         return data
 
-
-
 # Function to filter data points for specific time ranges of the day
 def filter_data_for_times(timestamps_data):
     filtered_data = []
@@ -202,7 +200,7 @@ def calculate_summary(data, time_ranges):
         entry_time = timestamp.time()
         for period, (start, end) in time_ranges.items():
             if start <= entry_time < end:
-                values = entry['values']
+                values = [v for v in entry['values'] if v is not None] # Filter out None (i.e. missing)
                 if values:
                     if summary[period]['count'] == 0:
                         summary[period]['mean'] = mean(values)
